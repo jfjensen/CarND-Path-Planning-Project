@@ -8,6 +8,7 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
+#include "spline.h"
 
 using namespace std;
 
@@ -170,7 +171,7 @@ int main() {
   vector<double> map_waypoints_dy;
 
   // Waypoint map to read from
-  string map_file_ = "../data/highway_map.csv";
+  string map_file_ = "./data/highway_map.csv";
   // The max s value before wrapping around the track back to 0
   double max_s = 6945.554;
 
@@ -195,6 +196,8 @@ int main() {
   	map_waypoints_dx.push_back(d_x);
   	map_waypoints_dy.push_back(d_y);
   }
+  std::cout << "waypoints size: " << map_waypoints_x.size() << std::endl;
+  
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
@@ -238,6 +241,31 @@ int main() {
           	vector<double> next_x_vals;
           	vector<double> next_y_vals;
 
+            std::cout << "Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
+            std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
+
+            int closestWP = ClosestWaypoint(car_x, car_y, map_waypoints_x, map_waypoints_y);
+            int nextWP = NextWaypoint(car_x, car_y, car_yaw, map_waypoints_x, map_waypoints_y);
+            std::cout << "Closest WP: " <<  closestWP << " Next WP: " << nextWP;
+
+            // vector<double> spline_x_vals;
+            // vector<double> spline_y_vals;
+
+            // spline_x_vals.push_back(map_waypoints_x[closestWP]);
+            // spline_y_vals.push_back(map_waypoints_y[closestWP]);
+            // spline_x_vals.push_back(map_waypoints_x[closestWP+1]);
+            // spline_y_vals.push_back(map_waypoints_y[closestWP+1]);
+            // spline_x_vals.push_back(map_waypoints_x[closestWP+2]);
+            // spline_y_vals.push_back(map_waypoints_y[closestWP+2]);
+
+            // tk::spline waypoint_spline;
+            // waypoint_spline.set_points(spline_x_vals, spline_y_vals);
+
+            // double s = waypoint_spline(car_x);
+
+            // std::cout << " s: " << s;
+
+            std::cout << std::endl;
 
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
 
@@ -275,13 +303,21 @@ int main() {
                 angle = atan2(pos_y-pos_y2,pos_x-pos_x2);
             }
 
-            double dist_inc = 0.5;
+            double dist_inc = 0.25;
             for(int i = 0; i < 50-path_size; i++)
             {    
                 next_x_vals.push_back(pos_x+(dist_inc)*cos(angle+(i+1)*(pi()/100)));
                 next_y_vals.push_back(pos_y+(dist_inc)*sin(angle+(i+1)*(pi()/100)));
                 pos_x += (dist_inc)*cos(angle+(i+1)*(pi()/100));
                 pos_y += (dist_inc)*sin(angle+(i+1)*(pi()/100));
+
+                // next_x_vals.push_back(pos_x+(dist_inc));
+                // next_y_vals.push_back(pos_y+(dist_inc));
+                // pos_x += (dist_inc);
+                // pos_y += (dist_inc);
+
+                // next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
+                // next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
             }
 
 
