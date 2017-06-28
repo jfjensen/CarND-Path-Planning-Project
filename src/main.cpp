@@ -169,6 +169,7 @@ int main() {
   vector<double> map_waypoints_s;
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
+  // vector<double> map_waypoints_angle;
 
   // Waypoint map to read from
   string map_file_ = "./data/highway_map.csv";
@@ -195,11 +196,24 @@ int main() {
   	map_waypoints_s.push_back(s);
   	map_waypoints_dx.push_back(d_x);
   	map_waypoints_dy.push_back(d_y);
+    // map_waypoints_angle.push_back(pi()/2 + atan2(d_y,d_x));
   }
   std::cout << "waypoints size: " << map_waypoints_x.size() << std::endl;
-  
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+  tk::spline WP_spline_x;
+  WP_spline_x.set_points(map_waypoints_s, map_waypoints_x);
+
+  tk::spline WP_spline_y;
+  WP_spline_y.set_points(map_waypoints_s, map_waypoints_y);
+
+
+  tk::spline WP_spline_dx;
+  WP_spline_dx.set_points(map_waypoints_s, map_waypoints_dx);
+
+  tk::spline WP_spline_dy;
+  WP_spline_dy.set_points(map_waypoints_s, map_waypoints_dy);
+
+  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&WP_spline_x,&WP_spline_y,&WP_spline_dx,&WP_spline_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -244,9 +258,11 @@ int main() {
             std::cout << "Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
             std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
 
-            int closestWP = ClosestWaypoint(car_x, car_y, map_waypoints_x, map_waypoints_y);
-            int nextWP = NextWaypoint(car_x, car_y, car_yaw, map_waypoints_x, map_waypoints_y);
-            std::cout << "Closest WP: " <<  closestWP << " Next WP: " << nextWP;
+            // int closestWP = ClosestWaypoint(car_x, car_y, map_waypoints_x, map_waypoints_y);
+            // int nextWP = NextWaypoint(car_x, car_y, car_yaw, map_waypoints_x, map_waypoints_y);
+            // std::cout << "Closest WP: " <<  closestWP << " Next WP: " << nextWP;
+
+            // std::cout << " WP_spline at car_s: " << WP_spline(car_s);
 
             // vector<double> spline_x_vals;
             // vector<double> spline_y_vals;
@@ -279,6 +295,9 @@ int main() {
             double pos_x;
             double pos_y;
             double angle;
+
+            double pos_s;
+
             int path_size = previous_path_x.size();
 
             for(int i = 0; i < path_size; i++)
@@ -292,6 +311,10 @@ int main() {
                 pos_x = car_x;
                 pos_y = car_y;
                 angle = deg2rad(car_yaw);
+                //  vector<double> fr_s_d;
+                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
+                // angle = WP_spline(fr_s_d[0]);
+                pos_s = car_s;
             }
             else
             {
@@ -301,15 +324,55 @@ int main() {
                 double pos_x2 = previous_path_x[path_size-2];
                 double pos_y2 = previous_path_y[path_size-2];
                 angle = atan2(pos_y-pos_y2,pos_x-pos_x2);
+
+                // vector<double> fr_s_d;
+                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
+                // angle = WP_spline(fr_s_d[0]);
             }
 
-            double dist_inc = 0.25;
+            // vector<double> fr_s_d;
+            // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
+            // pos_s = fr_s_d[0];
+
+            std::cout << "Itr: ";
+            double WP_x, WP_y, WP_dx, WP_dy;
+
+            double dist_inc = 0.4;
             for(int i = 0; i < 50-path_size; i++)
             {    
-                next_x_vals.push_back(pos_x+(dist_inc)*cos(angle+(i+1)*(pi()/100)));
-                next_y_vals.push_back(pos_y+(dist_inc)*sin(angle+(i+1)*(pi()/100)));
-                pos_x += (dist_inc)*cos(angle+(i+1)*(pi()/100));
-                pos_y += (dist_inc)*sin(angle+(i+1)*(pi()/100));
+                // next_x_vals.push_back(pos_x+(dist_inc)*cos(angle+(i+1)*(pi()/100)));
+                // next_y_vals.push_back(pos_y+(dist_inc)*sin(angle+(i+1)*(pi()/100)));
+                // pos_x += (dist_inc)*cos(angle+(i+1)*(pi()/100));
+                // pos_y += (dist_inc)*sin(angle+(i+1)*(pi()/100));
+
+                // vector<double> fr_s_d;
+                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
+                // pos_s = fr_s_d[0];
+                pos_s += dist_inc;
+                WP_x = WP_spline_x(pos_s);
+                WP_y = WP_spline_y(pos_s);
+                WP_dx = WP_spline_dx(pos_s);
+                WP_dy = WP_spline_dy(pos_s);
+                // angle = (pi()/2) + atan2(WP_dy,WP_dx);
+
+                // vector<double> x_y;
+                // x_y = getXY(pos_s, 6.0, map_waypoints_s, map_waypoints_x, map_waypoints_y);
+
+                // std::cout << " " << pos_x << " " << pos_y << " " << angle;
+                // pos_x += (dist_inc)*cos(angle);
+                // pos_y += (dist_inc)*sin(angle);
+                // pos_x = x_y[0];
+                // pos_y = x_y[1];
+                pos_x = WP_x + 6.0 * WP_dx;
+                pos_y = WP_y + 6.0 * WP_dy;
+                // pos_s += dist_inc;
+
+                next_x_vals.push_back(pos_x);
+                next_y_vals.push_back(pos_y);
+
+                // next_x_vals.push_back(pos_x+(dist_inc)*cos(angle*(pi()/180)));
+                // next_y_vals.push_back(pos_y+(dist_inc)*sin(angle*(pi()/180)));
+
 
                 // next_x_vals.push_back(pos_x+(dist_inc));
                 // next_y_vals.push_back(pos_y+(dist_inc));
@@ -319,7 +382,7 @@ int main() {
                 // next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
                 // next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
             }
-
+            std::cout << std::endl;
 
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;
