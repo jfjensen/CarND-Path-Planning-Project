@@ -258,6 +258,26 @@ int main() {
             std::cout << "Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
             std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
 
+            int sf_len = sensor_fusion.size();
+            std::cout << "sf_len: " << sf_len << std::endl;
+            for (int i = 0; i < sf_len; ++i)
+            {
+              
+              auto item = sensor_fusion[i];
+              double item_vx = item[3];
+              double item_vy = item[4];
+              double item_s  = item[5];
+              double item_d  = item[6];
+              double item_v  = sqrt(item_vx*item_vx + item_vy*item_vy);
+
+              if ((item_d > 4.0) and (item_d < 8.0) and (item_s > car_s))
+              {
+                std::cout << item << " v: " << item_v << std::endl;  
+              }
+              
+            }
+            // std::cout << std::endl;
+
             // int closestWP = ClosestWaypoint(car_x, car_y, map_waypoints_x, map_waypoints_y);
             // int nextWP = NextWaypoint(car_x, car_y, car_yaw, map_waypoints_x, map_waypoints_y);
             // std::cout << "Closest WP: " <<  closestWP << " Next WP: " << nextWP;
@@ -281,7 +301,7 @@ int main() {
 
             // std::cout << " s: " << s;
 
-            std::cout << std::endl;
+            // std::cout << std::endl;
 
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
 
@@ -315,6 +335,7 @@ int main() {
                 // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
                 // angle = WP_spline(fr_s_d[0]);
                 pos_s = car_s;
+
             }
             else
             {
@@ -338,6 +359,7 @@ int main() {
             double WP_x, WP_y, WP_dx, WP_dy;
 
             double dist_inc = 0.4;
+            
             for(int i = 0; i < 50-path_size; i++)
             {    
                 // next_x_vals.push_back(pos_x+(dist_inc)*cos(angle+(i+1)*(pi()/100)));
@@ -348,7 +370,9 @@ int main() {
                 // vector<double> fr_s_d;
                 // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
                 // pos_s = fr_s_d[0];
-                pos_s += dist_inc;
+
+                pos_s += dist_inc;  
+                
                 WP_x = WP_spline_x(pos_s);
                 WP_y = WP_spline_y(pos_s);
                 WP_dx = WP_spline_dx(pos_s);
@@ -366,6 +390,9 @@ int main() {
                 pos_x = WP_x + 6.0 * WP_dx;
                 pos_y = WP_y + 6.0 * WP_dy;
                 // pos_s += dist_inc;
+
+                // pos_x = WP_x + 2.0 * WP_dx;
+                // pos_y = WP_y + 2.0 * WP_dy;
 
                 next_x_vals.push_back(pos_x);
                 next_y_vals.push_back(pos_y);
