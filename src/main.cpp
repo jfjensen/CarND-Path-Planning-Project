@@ -236,6 +236,7 @@ int main() {
 
   PathPlanner pp;
   pp.dist_inc = 0.00;
+  pp.d = 6.0;
   pp.SetChangeSpeed(0.42);
 
   int count = 0;
@@ -434,6 +435,12 @@ int main() {
 
                 }
 
+                if (pp.IsChangeLane())
+                {
+                    pp.ChangeLane();
+                }
+
+
                 if (pp.IsNoChange())
                 {
                   if (count == 301)
@@ -444,6 +451,26 @@ int main() {
                   if (count == 550)
                   {
                     pp.SetChangeSpeed(0.42);
+                  }
+
+                  if (count == 750)
+                  {
+                    pp.SetChangeLane(2.0);
+                  }
+
+                  if (count == 950)
+                  {
+                    pp.SetChangeLane(6.0);
+                  }
+
+                  if (count == 1150)
+                  {
+                    pp.SetChangeLane(10.0);
+                  }
+
+                  if (count == 1350)
+                  {
+                    pp.SetChangeLane(2.0);
                   }
                 }
 
@@ -465,8 +492,13 @@ int main() {
                 // pos_y += (dist_inc)*sin(angle);
                 // pos_x = x_y[0];
                 // pos_y = x_y[1];
-                pos_x = WP_x + 6.0 * WP_dx;
-                pos_y = WP_y + 6.0 * WP_dy;
+                // pos_x = WP_x + 6.0 * WP_dx;
+                // pos_y = WP_y + 6.0 * WP_dy;
+
+                double lane_d = pp.d;
+
+                pos_x = WP_x + lane_d * WP_dx;
+                pos_y = WP_y + lane_d * WP_dy;
                 // pos_s += dist_inc;
 
                 // pos_x = WP_x + 2.0 * WP_dx;
