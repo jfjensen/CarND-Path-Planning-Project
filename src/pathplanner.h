@@ -47,6 +47,7 @@ public:
   	double goal_d;
   	double start_d;
   	double d;
+  	
   	double subd;
 };
 

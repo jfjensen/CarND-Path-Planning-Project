@@ -287,24 +287,113 @@ int main() {
             std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
             count++;
 
+            enum LANE_ID { LEFT, MID, RIGHT };
+            LANE_ID car_lane;
+            if (car_d < 4.0)
+            {
+              car_lane = LEFT;
+            }
+            else if ((car_d >= 4.0) and (car_d < 8.0))
+            {
+              car_lane = MID;
+            }
+            else
+            {
+              car_lane = RIGHT;
+            }
+
             int sf_len = sensor_fusion.size();
             // std::cout << "sf_len: " << sf_len << std::endl;
+
+            vector<double> leftlane_infront;
+            vector<double> midlane_infront;
+            vector<double> rightlane_infront;
+
+            vector<double> leftlane_behind;
+            vector<double> midlane_behind;
+            vector<double> rightlane_behind;
+
             for (int i = 0; i < sf_len; ++i)
             {
               
               auto item = sensor_fusion[i];
+              double item_x = item[1];
+              double item_y = item[2];
               double item_vx = item[3];
               double item_vy = item[4];
               double item_s  = item[5];
               double item_d  = item[6];
               double item_v  = sqrt(item_vx*item_vx + item_vy*item_vy);
+              double item_dist = distance(car_x,car_y,item_x,item_y);
 
-              if ((item_d > 4.0) and (item_d < 8.0) and (item_s > car_s))
+              
+              // only look at car if close...
+              if (item_dist < 60)
               {
-                // std::cout << item << " v: " << item_v << std::endl;  
+                  
+                  // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
+
+                  // is this car left lane?
+                  if ((item_d < 4.0))
+                  {
+                    
+                    // is the car in front of us?
+                    if (item_s > car_s)
+                    {
+                        leftlane_infront.push_back(item_v);                      
+                    }
+                    // or behind us?
+                    else
+                    {
+                        leftlane_behind.push_back(item_v);
+                    }
+  
+                  }
+                  // or is this car in middle lane?
+                  else if ((item_d >= 4.0) and (item_d < 8.0) )
+                  {
+                    
+                    // is the car in front of us?
+                    if (item_s > car_s)
+                    {
+                        midlane_infront.push_back(item_v);                      
+                    }
+                    // or behind us?
+                    else
+                    {
+                        midlane_behind.push_back(item_v);
+                    }
+  
+                  }
+                  // or is this car in right lane?
+                  else
+                  {
+                    
+                    // is the car in front of us?
+                    if (item_s > car_s)
+                    {
+                        rightlane_infront.push_back(item_v);                      
+                    }
+                    // or behind us?
+                    else
+                    {
+                        rightlane_behind.push_back(item_v);
+                    }
+  
+                  }
+
               }
               
             }
+            cout << endl;
+            cout << leftlane_infront.size()<< "  ";
+            cout << midlane_infront.size()<< "  ";
+            cout << rightlane_infront.size()<< endl;
+            cout << " " << "  " << "*" << endl;
+
+            cout << leftlane_behind.size()<< "  ";
+            cout << midlane_behind.size()<< "  ";
+            cout << rightlane_behind.size()<< endl << endl;
            
             double pos_x;
             double pos_y;
@@ -363,43 +452,120 @@ int main() {
                     pp.ChangeSpeed();
                 }
 
-                if (pp.IsChangeLane())
+                else if (pp.IsChangeLane())
                 {
                     pp.ChangeLane();
                 }
 
 
-                if (pp.IsNoChange())
+                else //if (pp.IsNoChange())
                 {
-                  if (count == 301)
+                  
+                  if(car_lane == LEFT)
                   {
-                    pp.SetChangeSpeed(0.1);
+
+                    if (leftlane_infront.size() == 0)
+                    {
+                       
+                      if (pp.dist_inc < 0.42)
+                      {
+                       pp.SetChangeSpeed(0.42);
+                      }
+
+                    }
+                    else
+                    {
+                      if (midlane_infront.size() == 0)
+                      {
+                        pp.SetChangeLane(6.0);
+                      }
+                      else if (pp.dist_inc > 0.2)
+                      {
+                        pp.SetChangeSpeed(0.2);
+                      }
+                    }
+                  }
+                  else if (car_lane == MID)
+                  {
+
+                    if (midlane_infront.size() == 0)
+                    {
+                      if (pp.dist_inc < 0.42)
+                      {
+                       pp.SetChangeSpeed(0.42);
+                      }
+                    }
+                    else
+                    {
+                      if (leftlane_infront.size() == 0)
+                      {
+                        pp.SetChangeLane(2.0);
+                      }
+                      else if (rightlane_infront.size() == 0)
+                      {
+                        pp.SetChangeLane(10.0);
+                      }
+                      else if (pp.dist_inc > 0.2)
+                      {
+                        pp.SetChangeSpeed(0.2);
+                      }
+                    }
+                  }
+                  else if (car_lane == RIGHT)
+                  {
+                      
+                      if (rightlane_infront.size() == 0)
+                      {
+                        if (pp.dist_inc < 0.42)
+                        {
+                         pp.SetChangeSpeed(0.42);
+                        }  
+                      }
+                      else
+                      {
+                        if (midlane_infront.size() == 0)
+                        {
+                          pp.SetChangeLane(6.0);
+                        }
+                        else if (pp.dist_inc > 0.2)
+                        {
+                          pp.SetChangeSpeed(0.2);
+                        }
+                      }
+                      
                   }
 
-                  if (count == 550)
-                  {
-                    pp.SetChangeSpeed(0.42);
-                  }
 
-                  if (count == 750)
-                  {
-                    pp.SetChangeLane(2.0);
-                  }
 
-                  if (count == 950)
-                  {
-                    pp.SetChangeLane(6.0);
-                  }
+                  // if (count == 301)
+                  // {
+                  //   pp.SetChangeSpeed(0.1);
+                  // }
 
-                  if (count == 1150)
-                  {
-                    pp.SetChangeLane(10.0);
-                  }
+                  // if (count == 550)
+                  // {
+                  //   pp.SetChangeSpeed(0.42);
+                  // }
 
-                  if (count == 1350)
-                  {
-                    pp.SetChangeLane(2.0);
-                  }
+                  // if (count == 750)
+                  // {
+                  //   pp.SetChangeLane(2.0);
+                  // }
+
+                  // if (count == 950)
+                  // {
+                  //   pp.SetChangeLane(6.0);
+                  // }
+
+                  // if (count == 1150)
+                  // {
+                  //   pp.SetChangeLane(10.0);
+                  // }
+
+                  // if (count == 1350)
+                  // {
+                  //   pp.SetChangeLane(2.0);
+                  // }
                 }
 
 
