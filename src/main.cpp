@@ -9,6 +9,7 @@
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
 #include "spline.h"
+#include "pathplanner.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ using json = nlohmann::json;
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
 double rad2deg(double x) { return x * 180 / pi(); }
+
 
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
@@ -160,6 +162,16 @@ vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> m
 
 }
 
+double mph_to_ms(double mph)
+{
+  return mph * (1600/3600);
+}
+
+double ms_to_mph(double ms)
+{
+  return ms * (3600/1600);
+}
+
 int main() {
   uWS::Hub h;
 
@@ -198,6 +210,11 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
     // map_waypoints_angle.push_back(pi()/2 + atan2(d_y,d_x));
   }
+
+  // enum STATUS { SPEED_UP_TO, SLOW_DOWN_TO, KEEP_SPEED };
+
+  // double goal_speed = 42.0;
+
   std::cout << "waypoints size: " << map_waypoints_x.size() << std::endl;
 
   tk::spline WP_spline_x;
@@ -213,7 +230,17 @@ int main() {
   tk::spline WP_spline_dy;
   WP_spline_dy.set_points(map_waypoints_s, map_waypoints_dy);
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&WP_spline_x,&WP_spline_y,&WP_spline_dx,&WP_spline_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+  // STATUS status;
+  // status = SPEED_UP_TO;
+  // double dist_inc;
+
+  PathPlanner pp;
+  pp.dist_inc = 0.00;
+  pp.SetChangeSpeed(0.42);
+
+  int count = 0;
+
+  h.onMessage([&count,&pp, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&WP_spline_x,&WP_spline_y,&WP_spline_dx,&WP_spline_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -255,11 +282,12 @@ int main() {
           	vector<double> next_x_vals;
           	vector<double> next_y_vals;
 
-            std::cout << "Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
+            std::cout << "#" << count << " >> Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
             std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
+            count++;
 
             int sf_len = sensor_fusion.size();
-            std::cout << "sf_len: " << sf_len << std::endl;
+            // std::cout << "sf_len: " << sf_len << std::endl;
             for (int i = 0; i < sf_len; ++i)
             {
               
@@ -272,7 +300,7 @@ int main() {
 
               if ((item_d > 4.0) and (item_d < 8.0) and (item_s > car_s))
               {
-                std::cout << item << " v: " << item_v << std::endl;  
+                // std::cout << item << " v: " << item_v << std::endl;  
               }
               
             }
@@ -324,6 +352,8 @@ int main() {
             {
                 next_x_vals.push_back(previous_path_x[i]);
                 next_y_vals.push_back(previous_path_y[i]);
+
+                
             }
 
             if(path_size == 0)
@@ -335,7 +365,18 @@ int main() {
                 // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
                 // angle = WP_spline(fr_s_d[0]);
                 pos_s = car_s;
-
+                cout << "PATHSIZE0" << endl;
+                // if (car_speed < 1.0)
+                // {
+                //   pp.dist_inc = 0.05;
+                //   pp.status = pp.CHNG_SPEED;  
+                // }
+                // cout << "status: " << pp.status << endl;
+                if (count == 0)
+                {
+                  // pp.dist_inc = 0.01;
+                  pp.SetChangeSpeed(0.42);
+                }
             }
             else
             {
@@ -346,6 +387,9 @@ int main() {
                 double pos_y2 = previous_path_y[path_size-2];
                 angle = atan2(pos_y-pos_y2,pos_x-pos_x2);
 
+                cout << "pos_x: " << pos_x << " pos_y: " << pos_y << endl;
+
+                // cout << "status: " << pp.status << endl;
                 // vector<double> fr_s_d;
                 // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
                 // angle = WP_spline(fr_s_d[0]);
@@ -355,10 +399,13 @@ int main() {
             // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
             // pos_s = fr_s_d[0];
 
-            std::cout << "Itr: ";
+            // std::cout << "Itr: ";
+
+            cout << "status: " << pp.status << " dist_inc: " << pp.dist_inc << endl;
+
             double WP_x, WP_y, WP_dx, WP_dy;
 
-            double dist_inc = 0.4;
+            // double dist_inc = 0.4;
             
             for(int i = 0; i < 50-path_size; i++)
             {    
@@ -370,9 +417,40 @@ int main() {
                 // vector<double> fr_s_d;
                 // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
                 // pos_s = fr_s_d[0];
+                if (pp.IsChangeSpeed())
+                {
+                    
+                    // double goal_inc;
+                    // if ((count >= 100) and (count < 500))
+                    // {
+                    //   goal_inc = 0.1;
+                    // }
+                    // else
+                    // {
+                    //   goal_inc = 0.42;
+                    // }
+                    
+                    pp.ChangeSpeed();
 
-                pos_s += dist_inc;  
-                
+                }
+
+                if (pp.IsNoChange())
+                {
+                  if (count == 301)
+                  {
+                    pp.SetChangeSpeed(0.1);
+                  }
+
+                  if (count == 550)
+                  {
+                    pp.SetChangeSpeed(0.42);
+                  }
+                }
+
+
+                pos_s += pp.dist_inc;  
+                // cout << "speed: " << ms_to_mph(pp.dist_inc*50.0) << endl;
+
                 WP_x = WP_spline_x(pos_s);
                 WP_y = WP_spline_y(pos_s);
                 WP_dx = WP_spline_dx(pos_s);
