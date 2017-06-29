@@ -305,42 +305,7 @@ int main() {
               }
               
             }
-            // std::cout << std::endl;
-
-            // int closestWP = ClosestWaypoint(car_x, car_y, map_waypoints_x, map_waypoints_y);
-            // int nextWP = NextWaypoint(car_x, car_y, car_yaw, map_waypoints_x, map_waypoints_y);
-            // std::cout << "Closest WP: " <<  closestWP << " Next WP: " << nextWP;
-
-            // std::cout << " WP_spline at car_s: " << WP_spline(car_s);
-
-            // vector<double> spline_x_vals;
-            // vector<double> spline_y_vals;
-
-            // spline_x_vals.push_back(map_waypoints_x[closestWP]);
-            // spline_y_vals.push_back(map_waypoints_y[closestWP]);
-            // spline_x_vals.push_back(map_waypoints_x[closestWP+1]);
-            // spline_y_vals.push_back(map_waypoints_y[closestWP+1]);
-            // spline_x_vals.push_back(map_waypoints_x[closestWP+2]);
-            // spline_y_vals.push_back(map_waypoints_y[closestWP+2]);
-
-            // tk::spline waypoint_spline;
-            // waypoint_spline.set_points(spline_x_vals, spline_y_vals);
-
-            // double s = waypoint_spline(car_x);
-
-            // std::cout << " s: " << s;
-
-            // std::cout << std::endl;
-
-          	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
-
-            // double dist_inc = 0.5;
-            // for(int i = 0; i < 50; i++)
-            // {
-            //       next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
-            //       next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
-            // }
-
+           
             double pos_x;
             double pos_y;
             double angle;
@@ -362,20 +327,12 @@ int main() {
                 pos_x = car_x;
                 pos_y = car_y;
                 angle = deg2rad(car_yaw);
-                //  vector<double> fr_s_d;
-                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
-                // angle = WP_spline(fr_s_d[0]);
+
                 pos_s = car_s;
                 cout << "PATHSIZE0" << endl;
-                // if (car_speed < 1.0)
-                // {
-                //   pp.dist_inc = 0.05;
-                //   pp.status = pp.CHNG_SPEED;  
-                // }
-                // cout << "status: " << pp.status << endl;
+
                 if (count == 0)
                 {
-                  // pp.dist_inc = 0.01;
                   pp.SetChangeSpeed(0.42);
                 }
             }
@@ -390,17 +347,7 @@ int main() {
 
                 cout << "pos_x: " << pos_x << " pos_y: " << pos_y << endl;
 
-                // cout << "status: " << pp.status << endl;
-                // vector<double> fr_s_d;
-                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
-                // angle = WP_spline(fr_s_d[0]);
             }
-
-            // vector<double> fr_s_d;
-            // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
-            // pos_s = fr_s_d[0];
-
-            // std::cout << "Itr: ";
 
             cout << "status: " << pp.status << " dist_inc: " << pp.dist_inc << endl;
 
@@ -410,29 +357,10 @@ int main() {
             
             for(int i = 0; i < 50-path_size; i++)
             {    
-                // next_x_vals.push_back(pos_x+(dist_inc)*cos(angle+(i+1)*(pi()/100)));
-                // next_y_vals.push_back(pos_y+(dist_inc)*sin(angle+(i+1)*(pi()/100)));
-                // pos_x += (dist_inc)*cos(angle+(i+1)*(pi()/100));
-                // pos_y += (dist_inc)*sin(angle+(i+1)*(pi()/100));
 
-                // vector<double> fr_s_d;
-                // fr_s_d = getFrenet(pos_x, pos_y, angle, map_waypoints_x, map_waypoints_y);
-                // pos_s = fr_s_d[0];
                 if (pp.IsChangeSpeed())
                 {
-                    
-                    // double goal_inc;
-                    // if ((count >= 100) and (count < 500))
-                    // {
-                    //   goal_inc = 0.1;
-                    // }
-                    // else
-                    // {
-                    //   goal_inc = 0.42;
-                    // }
-                    
                     pp.ChangeSpeed();
-
                 }
 
                 if (pp.IsChangeLane())
@@ -482,42 +410,16 @@ int main() {
                 WP_y = WP_spline_y(pos_s);
                 WP_dx = WP_spline_dx(pos_s);
                 WP_dy = WP_spline_dy(pos_s);
-                // angle = (pi()/2) + atan2(WP_dy,WP_dx);
-
-                // vector<double> x_y;
-                // x_y = getXY(pos_s, 6.0, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-
-                // std::cout << " " << pos_x << " " << pos_y << " " << angle;
-                // pos_x += (dist_inc)*cos(angle);
-                // pos_y += (dist_inc)*sin(angle);
-                // pos_x = x_y[0];
-                // pos_y = x_y[1];
-                // pos_x = WP_x + 6.0 * WP_dx;
-                // pos_y = WP_y + 6.0 * WP_dy;
 
                 double lane_d = pp.d;
 
                 pos_x = WP_x + lane_d * WP_dx;
                 pos_y = WP_y + lane_d * WP_dy;
-                // pos_s += dist_inc;
-
-                // pos_x = WP_x + 2.0 * WP_dx;
-                // pos_y = WP_y + 2.0 * WP_dy;
 
                 next_x_vals.push_back(pos_x);
                 next_y_vals.push_back(pos_y);
 
-                // next_x_vals.push_back(pos_x+(dist_inc)*cos(angle*(pi()/180)));
-                // next_y_vals.push_back(pos_y+(dist_inc)*sin(angle*(pi()/180)));
 
-
-                // next_x_vals.push_back(pos_x+(dist_inc));
-                // next_y_vals.push_back(pos_y+(dist_inc));
-                // pos_x += (dist_inc);
-                // pos_y += (dist_inc);
-
-                // next_x_vals.push_back(car_x+(dist_inc*i)*cos(deg2rad(car_yaw)));
-                // next_y_vals.push_back(car_y+(dist_inc*i)*sin(deg2rad(car_yaw)));
             }
             std::cout << std::endl;
 
