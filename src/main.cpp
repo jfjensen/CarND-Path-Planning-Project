@@ -185,8 +185,8 @@ int main() {
 
   // Waypoint map to read from
   string map_file_ = "./data/highway_map.csv";
-  // The max s value before wrapping around the track back to 0
-  double max_s = 6945.554;
+  // // The max s value before wrapping around the track back to 0
+  // double max_s = 6945.554;
 
   ifstream in_map_(map_file_.c_str(), ifstream::in);
 
@@ -237,7 +237,7 @@ int main() {
   PathPlanner pp;
   pp.dist_inc = 0.00;
   pp.d = 6.0;
-  pp.SetChangeSpeed(0.42);
+  // pp.SetChangeSpeed(0.42);
 
   int count = 0;
 
@@ -277,6 +277,9 @@ int main() {
 
           	// Sensor Fusion Data, a list of all other cars on the same side of the road.
           	auto sensor_fusion = j[1]["sensor_fusion"];
+
+            // The max s value before wrapping around the track back to 0
+            double max_s = 6945.554;
 
           	json msgJson;
 
@@ -328,7 +331,7 @@ int main() {
 
               
               // only look at car if close...
-              if (item_dist < 60)
+              if (item_dist < 40) //60)
               {
                   
                   // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
@@ -420,10 +423,10 @@ int main() {
                 pos_s = car_s;
                 cout << "PATHSIZE0" << endl;
 
-                if (count == 0)
-                {
-                  pp.SetChangeSpeed(0.42);
-                }
+                // if (count == 0)
+                // {
+                //   pp.SetChangeSpeed(0.42);
+                // }
             }
             else
             {
@@ -475,7 +478,7 @@ int main() {
                     }
                     else
                     {
-                      if (midlane_infront.size() == 0)
+                      if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
                       {
                         pp.SetChangeLane(6.0);
                       }
@@ -497,11 +500,11 @@ int main() {
                     }
                     else
                     {
-                      if (leftlane_infront.size() == 0)
+                      if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
                       {
                         pp.SetChangeLane(2.0);
                       }
-                      else if (rightlane_infront.size() == 0)
+                      else if ((rightlane_infront.size() == 0)and (rightlane_behind.size() == 0))
                       {
                         pp.SetChangeLane(10.0);
                       }
@@ -523,7 +526,7 @@ int main() {
                       }
                       else
                       {
-                        if (midlane_infront.size() == 0)
+                        if ((midlane_infront.size() == 0)and (midlane_behind.size() == 0))
                         {
                           pp.SetChangeLane(6.0);
                         }
@@ -537,39 +540,12 @@ int main() {
 
 
 
-                  // if (count == 301)
-                  // {
-                  //   pp.SetChangeSpeed(0.1);
-                  // }
-
-                  // if (count == 550)
-                  // {
-                  //   pp.SetChangeSpeed(0.42);
-                  // }
-
-                  // if (count == 750)
-                  // {
-                  //   pp.SetChangeLane(2.0);
-                  // }
-
-                  // if (count == 950)
-                  // {
-                  //   pp.SetChangeLane(6.0);
-                  // }
-
-                  // if (count == 1150)
-                  // {
-                  //   pp.SetChangeLane(10.0);
-                  // }
-
-                  // if (count == 1350)
-                  // {
-                  //   pp.SetChangeLane(2.0);
-                  // }
                 }
 
 
-                pos_s += pp.dist_inc;  
+                pos_s += pp.dist_inc;
+                pos_s = fmod(pos_s, max_s);
+
                 // cout << "speed: " << ms_to_mph(pp.dist_inc*50.0) << endl;
 
                 WP_x = WP_spline_x(pos_s);
