@@ -164,12 +164,12 @@ vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> m
 
 double mph_to_ms(double mph)
 {
-  return mph * (1600/3600);
+  return mph * (1600.0/3600.0);
 }
 
 double ms_to_mph(double ms)
 {
-  return ms * (3600/1600);
+  return ms * (3600.0/1600.0);
 }
 
 int main() {
@@ -470,21 +470,55 @@ int main() {
                     if (leftlane_infront.size() == 0)
                     {
                        
-                      if (pp.dist_inc < 0.42)
+                      if (pp.dist_inc < 0.40)//0.42)
                       {
-                       pp.SetChangeSpeed(0.42);
+                       cout << "SetChangeSpeed 0.41" << endl;
+                       pp.SetChangeSpeed(0.41);
                       }
 
                     }
                     else
                     {
+                      cout << "LEFT else..." << endl;
+
+                      double v;
+                      bool b= false;
+                      
+                      if (midlane_behind.size() > 0)
+                      {
+                        double v = *max_element(midlane_behind.begin(), midlane_behind.end());
+                        b = true;
+                      }
+                      
                       if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
                       {
+                        cout << "LEFT else... 1" << endl;
                         pp.SetChangeLane(6.0);
                       }
-                      else if (pp.dist_inc > 0.2)
+                      else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
                       {
+                        cout << "LEFT else... 2" << endl;
+                        pp.SetChangeLane(6.0);
+
+                      }
+                      else if (pp.dist_inc > 0.21)
+                      {
+                        cout << "LEFT else... 3" << endl;
+                        // double lowest_speed;
+                        // lowest_speed = *min_element(leftlane_infront.begin(), leftlane_infront.end());
+                        // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+                        
+                        // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+
+                        // if (not(new_dist_inc == pp.dist_inc))
+                        // {
+                        //   pp.SetChangeSpeed(new_dist_inc);
+                        // }
                         pp.SetChangeSpeed(0.2);
+                      }
+                      else
+                      {
+                        cout << "LEFT else... 4" << endl;
                       }
                     }
                   }
@@ -493,24 +527,75 @@ int main() {
 
                     if (midlane_infront.size() == 0)
                     {
-                      if (pp.dist_inc < 0.42)
+                      if (pp.dist_inc < 0.40)//0.42)
                       {
-                       pp.SetChangeSpeed(0.42);
+                       cout << "SetChangeSpeed 0.41" << endl;
+                       pp.SetChangeSpeed(0.41);
                       }
                     }
                     else
                     {
+                      
+                      cout << "MID else..." << endl;
+                      double v_l, v_r;
+                      bool b_l= false;
+                      bool b_r =false;
+                      if (leftlane_behind.size() > 0)
+                      {
+                        v_l = *max_element(leftlane_behind.begin(), leftlane_behind.end());
+                        b_l = true;  
+                      }
+                      if (rightlane_behind.size() > 0)
+                      {
+                        v_r = *max_element(rightlane_behind.begin(), rightlane_behind.end());
+                        b_r = true;
+                      }
+
                       if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
                       {
+                        
+                        cout << "MID else... 1" << endl;
                         pp.SetChangeLane(2.0);
+                      }
+                      else if (((leftlane_infront.size() == 0) and (b_l)) and (mph_to_ms(car_speed) > v_l))
+                      {
+                        
+                        cout << "MID else... 2" << endl;
+                        pp.SetChangeLane(2.0);
+
                       }
                       else if ((rightlane_infront.size() == 0)and (rightlane_behind.size() == 0))
                       {
+                        
+                        cout << "MID else... 3" << endl;
                         pp.SetChangeLane(10.0);
                       }
-                      else if (pp.dist_inc > 0.2)
+
+                      else if (((rightlane_infront.size() == 0) and (b_r)) and (mph_to_ms(car_speed) > v_r))
                       {
+                        
+                        cout << "MID else... 4" << endl;
+                        pp.SetChangeLane(10.0);
+
+                      }
+                      else if (pp.dist_inc > 0.21)
+                      {
+                        cout << "MID else... 5" << endl;
+                        // double lowest_speed;
+                        // lowest_speed = *min_element(midlane_infront.begin(), midlane_infront.end());
+                        // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+
+                        // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+
+                        // if (not(new_dist_inc == pp.dist_inc))
+                        // {
+                        //   pp.SetChangeSpeed(new_dist_inc);
+                        // }
                         pp.SetChangeSpeed(0.2);
+                      }
+                      else
+                      {
+                        cout << "MID else... 6" << endl;
                       }
                     }
                   }
@@ -519,20 +604,53 @@ int main() {
                       
                       if (rightlane_infront.size() == 0)
                       {
-                        if (pp.dist_inc < 0.42)
+                        if (pp.dist_inc < 0.40)//0.42)
                         {
-                         pp.SetChangeSpeed(0.42);
+                         cout << "SetChangeSpeed 0.41" << endl;
+                         pp.SetChangeSpeed(0.41);
                         }  
                       }
                       else
                       {
+                        cout << "RIGHT else..." << endl;
+                        double v;
+                        bool b = false;
+                      
+                        if (midlane_behind.size() > 0)
+                        {
+                          double v = *max_element(midlane_behind.begin(), midlane_behind.end());
+                          b=true;
+                        }
+
                         if ((midlane_infront.size() == 0)and (midlane_behind.size() == 0))
                         {
+                          cout << "RIGHT else... 1" << endl;
                           pp.SetChangeLane(6.0);
                         }
-                        else if (pp.dist_inc > 0.2)
+                        else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
                         {
+                          cout << "RIGHT else... 2" << endl;
+                          pp.SetChangeLane(6.0);
+
+                        }
+                        else if (pp.dist_inc > 0.21)
+                        {
+                          cout << "RIGHT else... 3" << endl;
+                          // double lowest_speed;
+                          // lowest_speed = *min_element(rightlane_infront.begin(), rightlane_infront.end());
+                          // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+
+                          // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+
+                          // if (not(new_dist_inc == pp.dist_inc))
+                          // {
+                          //   pp.SetChangeSpeed(new_dist_inc);
+                          // }
                           pp.SetChangeSpeed(0.2);
+                        }
+                        else
+                        {
+                          cout << "RIGHT else... 4" << endl;
                         }
                       }
                       

@@ -46,12 +46,14 @@ void PathPlanner::SetChangeSpeed(double goal_inc)
 
 	p = 0.0;
  
+  cout << "SET CHNG_SPEED" << endl;
+
 }
 
 void PathPlanner::ChangeSpeed()
 {
     
-    // cout << " dist_inc: " << dist_inc << " goal_inc: " << goal_inc << " start_inc: " << start_inc << " p: " << p << endl;
+    cout << " dist_inc: " << dist_inc << " goal_inc: " << goal_inc << " start_inc: " << start_inc << " p: " << p << endl;
 
     if ((sp_status == SPEED_UP) and (p < 1.0))
     {
@@ -97,22 +99,22 @@ void PathPlanner::SetChangeLane(double goal_d)
 	if (goal_d > start_d)
 	{
 		lc_status = CHG_RIGHT;
-		subd = (goal_d - start_d) * 20;
+		subd = (goal_d - start_d) * 30;
 	}
 	else
 	{
 		lc_status = CHG_LEFT;
-		subd = (start_d - goal_d) * 20;
+		subd = (start_d - goal_d) * 30;
 	}
 
 	p = 0.0;
-
+  cout << "SET CHNG_LANE" << endl;
 
 }
 void PathPlanner::ChangeLane()
 {
 
-	cout << " dist_inc: " << dist_inc << " goal_inc: " << goal_inc << " start_inc: " << start_inc << " p: " << p << endl;
+	cout << " d: " << d << " goal_d: " << goal_d << " start_d: " << start_d << " p: " << p << endl;
 
     if ((lc_status == CHG_RIGHT) and (p < 1.0))
     {
