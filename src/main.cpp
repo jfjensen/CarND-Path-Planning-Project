@@ -211,6 +211,22 @@ int main() {
     // map_waypoints_angle.push_back(pi()/2 + atan2(d_y,d_x));
   }
 
+  // The max s value before wrapping around the track back to 0
+  double max_s = 6945.554;
+
+  // add extra waypoint to loop back to the beginning with overlap...
+  // from John Chen @Slack
+  map_waypoints_x.push_back(map_waypoints_x[0]);
+  map_waypoints_y.push_back(map_waypoints_y[0]);
+  map_waypoints_s.push_back(max_s);
+  map_waypoints_dx.push_back(map_waypoints_dx[0]);
+  map_waypoints_dy.push_back(map_waypoints_dy[0]);
+  map_waypoints_x.push_back(map_waypoints_x[1]);
+  map_waypoints_y.push_back(map_waypoints_y[1]);
+  map_waypoints_s.push_back(max_s+map_waypoints_s[1]);
+  map_waypoints_dx.push_back(map_waypoints_dx[1]);
+  map_waypoints_dy.push_back(map_waypoints_dy[1]);
+
   // enum STATUS { SPEED_UP_TO, SLOW_DOWN_TO, KEEP_SPEED };
 
   // double goal_speed = 42.0;
