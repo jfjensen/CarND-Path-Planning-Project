@@ -10,6 +10,7 @@
 #include "json.hpp"
 #include "spline.h"
 #include "pathplanner.h"
+#include "vehicle.h"
 
 using namespace std;
 
@@ -324,13 +325,15 @@ int main() {
             int sf_len = sensor_fusion.size();
             // std::cout << "sf_len: " << sf_len << std::endl;
 
-            vector<double> leftlane_infront;
-            vector<double> midlane_infront;
-            vector<double> rightlane_infront;
+            vector<Vehicle> leftlane_infront;
+            vector<Vehicle> midlane_infront;
+            vector<Vehicle> rightlane_infront;
 
-            vector<double> leftlane_behind;
-            vector<double> midlane_behind;
-            vector<double> rightlane_behind;
+            vector<Vehicle> leftlane_behind;
+            vector<Vehicle> midlane_behind;
+            vector<Vehicle> rightlane_behind;
+
+            vector<Vehicle> veh_vector;
 
             for (int i = 0; i < sf_len; ++i)
             {
@@ -345,11 +348,13 @@ int main() {
               double item_v  = sqrt(item_vx*item_vx + item_vy*item_vy);
               double item_dist = distance(car_x,car_y,item_x,item_y);
 
-              
+              Vehicle veh (item_x, item_y, item_vx, item_vy, item_s, item_d, item_dist);
+
               // only look at car if close...
               if (item_dist < 40) //60)
               {
                   
+                  veh_vector.push_back(veh);
                   // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
 
                   // is this car left lane?
@@ -359,12 +364,12 @@ int main() {
                     // is the car in front of us?
                     if (item_s > car_s)
                     {
-                        leftlane_infront.push_back(item_v);                      
+                        leftlane_infront.push_back(veh);                      
                     }
                     // or behind us?
                     else
                     {
-                        leftlane_behind.push_back(item_v);
+                        leftlane_behind.push_back(veh);
                     }
   
                   }
@@ -375,12 +380,12 @@ int main() {
                     // is the car in front of us?
                     if (item_s > car_s)
                     {
-                        midlane_infront.push_back(item_v);                      
+                        midlane_infront.push_back(veh);                      
                     }
                     // or behind us?
                     else
                     {
-                        midlane_behind.push_back(item_v);
+                        midlane_behind.push_back(veh);
                     }
   
                   }
@@ -391,12 +396,12 @@ int main() {
                     // is the car in front of us?
                     if (item_s > car_s)
                     {
-                        rightlane_infront.push_back(item_v);                      
+                        rightlane_infront.push_back(veh);                      
                     }
                     // or behind us?
                     else
                     {
-                        rightlane_behind.push_back(item_v);
+                        rightlane_behind.push_back(veh);
                     }
   
                   }
@@ -465,6 +470,13 @@ int main() {
             
             for(int i = 0; i < 50-path_size; i++)
             {    
+                // cout << "veh.size: " << veh_vector.size() << endl;
+                // if (veh_vector.size() > 0)
+                // {
+                //   Vehicle v_veh = *max_element(veh_vector.begin(), veh_vector.end(), Vehicle::faster);
+                //   cout << "fastest: " << v_veh._v << endl; 
+                // }
+                
 
                 if (pp.IsChangeSpeed())
                 {
@@ -502,8 +514,16 @@ int main() {
                       
                       if (midlane_behind.size() > 0)
                       {
-                        double v = *max_element(midlane_behind.begin(), midlane_behind.end());
-                        b = true;
+                        Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
+                        Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
+                        v = v_veh._v;
+                        
+                        if (dist_veh._dist > 15)
+                        {
+                          b = true;
+                        }
+
+                        
                       }
                       
                       if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
@@ -558,13 +578,30 @@ int main() {
                       bool b_r =false;
                       if (leftlane_behind.size() > 0)
                       {
-                        v_l = *max_element(leftlane_behind.begin(), leftlane_behind.end());
-                        b_l = true;  
+                        
+                        Vehicle v_veh_l = *max_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::faster);
+                        Vehicle dist_veh = *min_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::closer);
+                        v_l = v_veh_l._v;
+
+                        if(dist_veh._dist > 15)
+                        {
+                          b_l = true;  
+                        }
+                        
                       }
                       if (rightlane_behind.size() > 0)
                       {
-                        v_r = *max_element(rightlane_behind.begin(), rightlane_behind.end());
-                        b_r = true;
+                        
+                        Vehicle v_veh_r = *max_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::faster);
+                        Vehicle dist_veh = *min_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::closer);
+                        v_r = v_veh_r._v;
+
+                        if(dist_veh._dist > 15)
+                        {
+                          b_r = true;  
+                        }
+                        
+                        
                       }
 
                       if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
@@ -634,8 +671,15 @@ int main() {
                       
                         if (midlane_behind.size() > 0)
                         {
-                          double v = *max_element(midlane_behind.begin(), midlane_behind.end());
-                          b=true;
+                          Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
+                          Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
+                          v = v_veh._v;
+
+                          if (dist_veh._dist > 15)
+                          {
+                            b=true;
+                          }
+                          
                         }
 
                         if ((midlane_infront.size() == 0)and (midlane_behind.size() == 0))
