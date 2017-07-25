@@ -6,7 +6,10 @@
 class Vehicle
 {
 public:
-	Vehicle(double x, double y, double vx, double vy, double s, double d, double dist)
+    Vehicle(){};
+	Vehicle(double x, double y, double v, double s, double d, double dist)
+    { _x = x; _y = y; _v = v; _s = s; _d = d;  _dist = dist; };
+    Vehicle(double x, double y, double vx, double vy, double s, double d, double dist)
 	 { _x = x; _y = y; _vx = vx; _vy = vy; _s = s; _d = d; _v = sqrt(vx*vx + vy*vy); _dist = dist; };
 	~Vehicle() {};
 

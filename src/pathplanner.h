@@ -5,6 +5,10 @@
 #include <string>
 #include <fstream>
 #include "Eigen-3.3/Eigen/Core"
+#include "vehicle.h"
+#include <iostream>
+
+using namespace std;
 
 class PathPlanner
 {
@@ -22,6 +26,24 @@ private:
 	
 	double p;
 
+	double max_speed;
+	double ref_speed;
+
+	Vehicle this_veh;
+
+	vector<Vehicle> veh_vec;
+
+    vector<Vehicle> leftlane_infront;
+    vector<Vehicle> midlane_infront;
+    vector<Vehicle> rightlane_infront;
+
+    vector<Vehicle> leftlane_behind;
+    vector<Vehicle> midlane_behind;
+    vector<Vehicle> rightlane_behind;
+
+    enum LANE_ID { LEFT, MID, RIGHT };
+    LANE_ID car_lane;
+
 public:
 	PathPlanner();
 	~PathPlanner() {};
@@ -35,6 +57,18 @@ public:
 	bool IsChangeLane();
 	void SetChangeLane(double goal_d);
 	void ChangeLane();
+
+	void setMaxSpeed(double max_speed) { this->max_speed = max_speed; };
+	void setVehicle(Vehicle);
+	void setVehicleVector(vector<Vehicle> veh_vec) { this->veh_vec = veh_vec; };
+	void findClosestVeh();
+
+	bool predCarInFront();
+	bool predCarInFrontDiffSpeed();
+	bool predMaxSpeed();
+
+	bool predExistLaneToLeft();
+	bool predExistLaneToRight();
 
 	/* data */
 	enum STATUS { CHNG_SPEED, CHNG_LANE, NO_CHNG };

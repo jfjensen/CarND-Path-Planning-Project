@@ -11,6 +11,8 @@
 #include "spline.h"
 #include "pathplanner.h"
 #include "vehicle.h"
+#include "node.h"
+#include "returncode.h"
 
 using namespace std;
 
@@ -251,14 +253,53 @@ int main() {
   // status = SPEED_UP_TO;
   // double dist_inc;
 
+  Selector *selector_root = new Selector();
+
+    Sequence *sequence_1 = new Sequence();
+    selector_root->addChild(sequence_1);
+
+      Conditional *conditional_1 = new Conditional();
+      sequence_1->addChild(conditional_1);
+
+      Selector *selector_2 = new Selector();
+      sequence_1->addChild(selector_2);
+
+        Selector *selector_3 = new Selector();
+        selector_2->addChild(selector_3);
+
+          Sequence *sequence_2 = new Sequence();
+          selector_3->addChild(sequence_2);
+
+            Conditional *conditional_2 = new Conditional();
+            sequence_2->addChild(conditional_2);
+
+            Action *action_1 = new Action();
+            sequence_2->addChild(action_1);
+
+    Selector *selector_1 = new Selector();
+    selector_root->addChild(selector_1);
+
+      Sequence *sequence_3 = new Sequence();
+      selector_1->addChild(sequence_3);
+
+        Conditional *conditional_3 = new Conditional();
+        sequence_3->addChild(conditional_3);
+
+        Action *action_2 = new Action();
+        sequence_3->addChild(action_2);
+
+      Action *action_3 = new Action();
+      selector_1->addChild(action_3);
+
   PathPlanner pp;
   pp.dist_inc = 0.00;
   pp.d = 6.0;
+  pp.setMaxSpeed(mph_to_ms(48));
   // pp.SetChangeSpeed(0.42);
 
   int count = 0;
 
-  h.onMessage([&count,&pp, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&WP_spline_x,&WP_spline_y,&WP_spline_dx,&WP_spline_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+  h.onMessage([&selector_root,&count,&pp, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&WP_spline_x,&WP_spline_y,&WP_spline_dx,&WP_spline_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -299,6 +340,8 @@ int main() {
             double max_s = 6945.554;
 
           	json msgJson;
+
+            Vehicle this_veh (car_x, car_y, mph_to_ms(car_speed), car_s, car_d, 0.0);
 
           	vector<double> next_x_vals;
           	vector<double> next_y_vals;
@@ -348,13 +391,14 @@ int main() {
               double item_v  = sqrt(item_vx*item_vx + item_vy*item_vy);
               double item_dist = distance(car_x,car_y,item_x,item_y);
 
-              Vehicle veh (item_x, item_y, item_vx, item_vy, item_s, item_d, item_dist);
+              Vehicle veh (item_x, item_y, item_v, item_s, item_d, item_dist);
+              veh_vector.push_back(veh);
 
               // only look at car if close...
               if (item_dist < 40) //60)
               {
                   
-                  veh_vector.push_back(veh);
+                  //veh_vector.push_back(veh);
                   // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
 
                   // is this car left lane?
@@ -409,15 +453,29 @@ int main() {
               }
               
             }
-            cout << endl;
-            cout << leftlane_infront.size()<< "  ";
-            cout << midlane_infront.size()<< "  ";
-            cout << rightlane_infront.size()<< endl;
-            cout << " " << "  " << "*" << endl;
 
-            cout << leftlane_behind.size()<< "  ";
-            cout << midlane_behind.size()<< "  ";
-            cout << rightlane_behind.size()<< endl << endl;
+            pp.setVehicle(this_veh);
+            pp.setVehicleVector(veh_vector);
+            pp.findClosestVeh();
+
+            cout << "Car in front? " << pp.predCarInFront() << endl;
+
+            cout << "Car in front diff speed? " << pp.predCarInFrontDiffSpeed() << endl;
+
+            cout << "Car at max speed? " << pp.predMaxSpeed() << endl;
+
+            cout << "Exist lane to the left:  " << pp.predExistLaneToLeft() << endl;
+            cout << "Exist lane to the right: " << pp.predExistLaneToRight() << endl;
+
+            // cout << endl;
+            // cout << leftlane_infront.size()<< "  ";
+            // cout << midlane_infront.size()<< "  ";
+            // cout << rightlane_infront.size()<< endl;
+            // cout << " " << "  " << "*" << endl;
+
+            // cout << leftlane_behind.size()<< "  ";
+            // cout << midlane_behind.size()<< "  ";
+            // cout << rightlane_behind.size()<< endl << endl;
            
             double pos_x;
             double pos_y;
@@ -477,6 +535,9 @@ int main() {
                 //   cout << "fastest: " << v_veh._v << endl; 
                 // }
                 
+
+                selector_root->tick();
+
 
                 if (pp.IsChangeSpeed())
                 {
