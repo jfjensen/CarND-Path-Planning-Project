@@ -7,6 +7,7 @@
 #include "Eigen-3.3/Eigen/Core"
 #include "vehicle.h"
 #include <iostream>
+#include "returncode.h"
 
 using namespace std;
 
@@ -65,10 +66,19 @@ public:
 
 	bool predCarInFront();
 	bool predCarInFrontDiffSpeed();
-	bool predMaxSpeed();
+	bool predLessThMaxSpeed();
 
 	bool predExistLaneToLeft();
 	bool predExistLaneToRight();
+
+	bool predChangeToLeft();
+	bool predChangeToRight();
+
+	ReturnCode actKeepSpeed(){ cout << "Keep Speed" << endl; return ReturnCode::SUCCESS;};
+	ReturnCode actChangeToMaxSpeed(){ cout << "Chg to max Speed" << endl; return ReturnCode::SUCCESS;};
+	ReturnCode actChangeToRefSpeed(){ cout << "Chg to ref Speed" << endl; return ReturnCode::SUCCESS;};
+	ReturnCode actChangeToLeft(){cout << "Change lane to left" << endl; return ReturnCode::SUCCESS;};
+	ReturnCode actChangeToRight(){cout << "Change lane to right" << endl; return ReturnCode::SUCCESS;};
 
 	/* data */
 	enum STATUS { CHNG_SPEED, CHNG_LANE, NO_CHNG };

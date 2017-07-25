@@ -4,13 +4,22 @@
 ReturnCode Conditional::tick()
 {
 	// return predicate();
-	return ReturnCode::SUCCESS;
+	if (predicate())
+	{
+		cout << "predicate success" << endl;
+		return ReturnCode::SUCCESS;
+	}
+	else
+	{
+		cout << "predicate failure" << endl;
+		return ReturnCode::FAILURE;
+	}
 }
 
 ReturnCode Action::tick()
 {
-	// return action();
-	return ReturnCode::SUCCESS;
+	return action();
+	// return ReturnCode::SUCCESS;
 }
 
 ReturnCode Sequence::tick()

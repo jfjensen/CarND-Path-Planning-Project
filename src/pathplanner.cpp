@@ -378,14 +378,16 @@ bool PathPlanner::predCarInFrontDiffSpeed()
 
 }
 
-bool PathPlanner::predMaxSpeed()
+bool PathPlanner::predLessThMaxSpeed()
 {
-
-  cout << "max_speed: " << max_speed << endl;
+  
 
   double car_speed = this->this_veh._v;
 
-  if (abs(car_speed-max_speed) < 0.5)
+  cout << "car_speed: " << car_speed << endl;
+  cout << "max_speed: " << max_speed << endl;
+
+  if (abs(car_speed-max_speed) > 0.5)
   {
     return true;
   }
@@ -419,5 +421,70 @@ bool PathPlanner::predExistLaneToRight()
   else
   {
     return true;
+  }
+}
+
+bool PathPlanner::predChangeToLeft()
+{
+
+  switch(car_lane)
+  {
+    
+    case MID:
+      if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+
+    case RIGHT:
+      if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    default:
+      return false;
+
+  }
+
+}
+
+bool PathPlanner::predChangeToRight()
+{
+  switch(car_lane)
+  {
+    
+    case LEFT:
+      if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+
+
+    case MID:
+      if ((rightlane_infront.size() == 0) and (rightlane_behind.size() == 0))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+
+   
+    default:
+      return false;
+
   }
 }

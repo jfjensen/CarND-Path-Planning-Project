@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <functional>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "json.hpp"
@@ -253,16 +254,72 @@ int main() {
   // status = SPEED_UP_TO;
   // double dist_inc;
 
+
+// bool predCarInFront();
+//   bool predCarInFrontDiffSpeed();
+//   bool predMaxSpeed();
+
+//   bool predExistLaneToLeft();
+//   bool predExistLaneToRight();
+
+//   bool predChangeToLeft();
+//   bool predChangeToRight();
+
+  // ReturnCode actKeepSpeed()
+  // ReturnCode actChangeToMaxSpeed()
+  // ReturnCode actChangeToRefSpeed()
+  // ReturnCode actChangeToLeft()
+  // ReturnCode actChangeToRight()
+
+
+  PathPlanner pp;
+  pp.dist_inc = 0.00;
+  pp.d = 6.0;
+  pp.setMaxSpeed(mph_to_ms(46));
+  // pp.SetChangeSpeed(0.42);
+
+  // https://stackoverflow.com/questions/12662891/passing-a-member-function-as-an-argument-in-c
   Selector *selector_root = new Selector();
 
     Sequence *sequence_1 = new Sequence();
     selector_root->addChild(sequence_1);
 
-      Conditional *conditional_1 = new Conditional();
+      auto predCarInFront = bind(&PathPlanner::predCarInFront, &pp);
+      Conditional *conditional_1 = new Conditional(predCarInFront);
       sequence_1->addChild(conditional_1);
 
       Selector *selector_2 = new Selector();
       sequence_1->addChild(selector_2);
+
+        Sequence *sequence_4 = new Sequence();
+        selector_2->addChild(sequence_4);
+
+          auto predExistLaneToLeft = bind(&PathPlanner::predExistLaneToLeft, &pp);
+          Conditional *conditional_4 = new Conditional(predExistLaneToLeft);
+          sequence_4->addChild(conditional_4);
+
+          auto predChangeToLeft = bind(&PathPlanner::predChangeToLeft, &pp);
+          Conditional *conditional_5 = new Conditional(predChangeToLeft);
+          sequence_4->addChild(conditional_5);
+
+          auto actChangeToLeft = bind(&PathPlanner::actChangeToLeft,&pp);
+          Action *action_5 = new Action(actChangeToLeft);
+          sequence_4->addChild(action_5);
+
+        Sequence *sequence_5 = new Sequence();
+        selector_2->addChild(sequence_5);
+
+          auto predExistLaneToRight = bind(&PathPlanner::predExistLaneToRight, &pp);
+          Conditional *conditional_6 = new Conditional(predExistLaneToRight);
+          sequence_5->addChild(conditional_6);
+
+          auto predChangeToRight = bind(&PathPlanner::predChangeToRight, &pp);
+          Conditional *conditional_7 = new Conditional(predChangeToRight);
+          sequence_5->addChild(conditional_7);
+
+          auto actChangeToRight = bind(&PathPlanner::actChangeToRight,&pp);
+          Action *action_6 = new Action(actChangeToRight);
+          sequence_5->addChild(action_6);
 
         Selector *selector_3 = new Selector();
         selector_2->addChild(selector_3);
@@ -270,11 +327,17 @@ int main() {
           Sequence *sequence_2 = new Sequence();
           selector_3->addChild(sequence_2);
 
-            Conditional *conditional_2 = new Conditional();
+            auto predCarInFrontDiffSpeed = bind(&PathPlanner::predCarInFrontDiffSpeed, &pp);
+            Conditional *conditional_2 = new Conditional(predCarInFrontDiffSpeed);
             sequence_2->addChild(conditional_2);
 
-            Action *action_1 = new Action();
+            auto actChangeToRefSpeed = bind(&PathPlanner::actChangeToRefSpeed,&pp);
+            Action *action_1 = new Action(actChangeToRefSpeed);
             sequence_2->addChild(action_1);
+
+          auto actKeepSpeed = bind(&PathPlanner::actKeepSpeed,&pp);
+          Action *action_4 = new Action(actKeepSpeed);
+          selector_3->addChild(action_4);
 
     Selector *selector_1 = new Selector();
     selector_root->addChild(selector_1);
@@ -282,20 +345,19 @@ int main() {
       Sequence *sequence_3 = new Sequence();
       selector_1->addChild(sequence_3);
 
-        Conditional *conditional_3 = new Conditional();
+        auto predLessThMaxSpeed = bind(&PathPlanner::predLessThMaxSpeed, &pp);
+        Conditional *conditional_3 = new Conditional(predLessThMaxSpeed);
         sequence_3->addChild(conditional_3);
 
-        Action *action_2 = new Action();
+        auto actChangeToMaxSpeed = bind(&PathPlanner::actChangeToMaxSpeed,&pp);
+        Action *action_2 = new Action(actChangeToMaxSpeed);
         sequence_3->addChild(action_2);
 
-      Action *action_3 = new Action();
+      auto actKeepSpeed_2 = bind(&PathPlanner::actKeepSpeed,&pp);
+      Action *action_3 = new Action(actKeepSpeed_2);
       selector_1->addChild(action_3);
 
-  PathPlanner pp;
-  pp.dist_inc = 0.00;
-  pp.d = 6.0;
-  pp.setMaxSpeed(mph_to_ms(48));
-  // pp.SetChangeSpeed(0.42);
+
 
   int count = 0;
 
@@ -458,14 +520,17 @@ int main() {
             pp.setVehicleVector(veh_vector);
             pp.findClosestVeh();
 
-            cout << "Car in front? " << pp.predCarInFront() << endl;
+            // cout << "Car in front? " << pp.predCarInFront() << endl;
 
-            cout << "Car in front diff speed? " << pp.predCarInFrontDiffSpeed() << endl;
+            // cout << "Car in front diff speed? " << pp.predCarInFrontDiffSpeed() << endl;
 
-            cout << "Car at max speed? " << pp.predMaxSpeed() << endl;
+            // cout << "Car at max speed? " << pp.predMaxSpeed() << endl;
 
-            cout << "Exist lane to the left:  " << pp.predExistLaneToLeft() << endl;
-            cout << "Exist lane to the right: " << pp.predExistLaneToRight() << endl;
+            // cout << "Exist lane to the left:  " << pp.predExistLaneToLeft() << endl;
+            // cout << "Exist lane to the right: " << pp.predExistLaneToRight() << endl;
+
+            // cout << "Change lane to the left:  " << pp.predChangeToLeft() << endl; 
+            // cout << "Change lane to the right:  " << pp.predChangeToRight() << endl;
 
             // cout << endl;
             // cout << leftlane_infront.size()<< "  ";

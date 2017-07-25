@@ -51,11 +51,13 @@ class Conditional : public Leaf
 {
 private:
 	//http://www.learncpp.com/cpp-tutorial/78-function-pointers/
-	function<ReturnCode()> predicate;
+	//function<ReturnCode()> predicate;
+	function<bool()> predicate;
 
 public:
 	Conditional(){};
-	Conditional(function<ReturnCode()> pred){ predicate = pred; };
+	Conditional(function<bool()> pred){ predicate = pred; };
+	//Conditional(function<ReturnCode()> pred){ predicate = pred; };
 	~Conditional(){};
 	ReturnCode tick();
 
