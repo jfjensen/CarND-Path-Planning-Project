@@ -546,14 +546,48 @@ ReturnCode PathPlanner::actChangeToRefSpeed()
   
 }
 
+ReturnCode PathPlanner::actChangeLane(double start_d, double goal_d)
+{ 
+ 
+  if (trajectory_status == INIT)
+  {
+    
+    this->trajectory = new EasingTrajectory();
+
+    trajectory->init_d(start_d, goal_d);
+    trajectory_status = RUNNING;
+  }
+
+  ReturnCode trajectory_result = trajectory->generate_d();
+  cout << "Trajectory generated d: " << trajectory->get_d() << endl;
+
+  if (trajectory_result == ReturnCode::SUCCESS)
+  {
+    delete this->trajectory;
+    trajectory_status = INIT;
+  }
+
+  return trajectory_result;
+  // return ReturnCode::SUCCESS;
+}
+
 ReturnCode PathPlanner::actChangeToLeft()
 {
   cout << "Change lane to left" << endl;
-  return ReturnCode::SUCCESS;
+
+  double car_d = this_veh._d;
+
+  return actChangeLane(car_d, car_d - 4.0);
+
+  // return ReturnCode::SUCCESS;
 }
 
 ReturnCode PathPlanner::actChangeToRight()
 {
   cout << "Change lane to right" << endl;
-  return ReturnCode::SUCCESS;
+
+  double car_d = this_veh._d;
+
+  return actChangeLane(car_d, car_d + 4.0);
+  // return ReturnCode::SUCCESS;
 }

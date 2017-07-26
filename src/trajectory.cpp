@@ -51,4 +51,31 @@ ReturnCode EasingTrajectory::generate_s_dot()
 ReturnCode EasingTrajectory::generate_d()
 {
 
+	cout << "generate_d_dot: " << start_d << " " << goal_d << endl;
+	if ((goal_d > start_d) and (p < 1.0))
+    {
+      
+      	double subd = (goal_d - start_d) * 30;
+    	p = p + (1.0/subd);
+
+    	curr_d = start_d + (0.5 * (1 - cos(p * M_PI)) * (goal_d - start_d) );
+
+    	return ReturnCode::RUNNING;
+         
+    }
+    else if ((goal_d < start_d) and (p < 1.0))
+    {
+    	double subd = (start_d - goal_d) * 30;
+    	p = p + (1.0/subd);
+
+    	curr_d = start_d - (0.5 * (1 - cos(p * M_PI)) * (start_d - goal_d) );
+
+    	return ReturnCode::RUNNING;
+    }
+
+    else
+    {
+      return ReturnCode::SUCCESS;
+    }
+
 }

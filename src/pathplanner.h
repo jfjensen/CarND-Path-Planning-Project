@@ -85,6 +85,7 @@ public:
 	ReturnCode actChangeToRight();
 
 	ReturnCode actChangeSpeed(double, double);
+	ReturnCode actChangeLane(double, double);
 
 	/* data */
 	enum STATUS { CHNG_SPEED, CHNG_LANE, NO_CHNG };
