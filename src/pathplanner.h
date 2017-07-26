@@ -8,6 +8,7 @@
 #include "vehicle.h"
 #include <iostream>
 #include "returncode.h"
+#include "trajectory.h"
 
 using namespace std;
 
@@ -18,6 +19,7 @@ private:
 
 	enum MODL_STATUS { INIT, RUNNING, COMPLETE };
 	MODL_STATUS mod_status;
+	MODL_STATUS trajectory_status;
 
 	enum SPEED_CHG_STATUS { SLOW_DOWN, SPEED_UP };
 	SPEED_CHG_STATUS sp_status;
@@ -41,6 +43,8 @@ private:
     vector<Vehicle> leftlane_behind;
     vector<Vehicle> midlane_behind;
     vector<Vehicle> rightlane_behind;
+
+    Trajectory *trajectory;
 
     enum LANE_ID { LEFT, MID, RIGHT };
     LANE_ID car_lane;
@@ -74,11 +78,13 @@ public:
 	bool predChangeToLeft();
 	bool predChangeToRight();
 
-	ReturnCode actKeepSpeed(){ cout << "Keep Speed" << endl; return ReturnCode::SUCCESS;};
-	ReturnCode actChangeToMaxSpeed(){ cout << "Chg to max Speed" << endl; return ReturnCode::SUCCESS;};
-	ReturnCode actChangeToRefSpeed(){ cout << "Chg to ref Speed" << endl; return ReturnCode::SUCCESS;};
-	ReturnCode actChangeToLeft(){cout << "Change lane to left" << endl; return ReturnCode::SUCCESS;};
-	ReturnCode actChangeToRight(){cout << "Change lane to right" << endl; return ReturnCode::SUCCESS;};
+	ReturnCode actKeepSpeed();
+	ReturnCode actChangeToMaxSpeed();
+	ReturnCode actChangeToRefSpeed();
+	ReturnCode actChangeToLeft();
+	ReturnCode actChangeToRight();
+
+	ReturnCode actChangeSpeed(double, double);
 
 	/* data */
 	enum STATUS { CHNG_SPEED, CHNG_LANE, NO_CHNG };

@@ -279,6 +279,7 @@ int main() {
   // pp.SetChangeSpeed(0.42);
 
   // https://stackoverflow.com/questions/12662891/passing-a-member-function-as-an-argument-in-c
+  // http://en.cppreference.com/w/cpp/utility/functional/bind
   Selector *selector_root = new Selector();
 
     Sequence *sequence_1 = new Sequence();

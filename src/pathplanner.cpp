@@ -8,7 +8,7 @@ PathPlanner::PathPlanner()
   	// status = CHNG_SPEED;
   	status = NO_CHNG;
   	mod_status = INIT;
-
+    trajectory_status = INIT;
   	
 }
 
@@ -487,4 +487,73 @@ bool PathPlanner::predChangeToRight()
       return false;
 
   }
+}
+
+
+ReturnCode PathPlanner::actKeepSpeed()
+{ 
+  cout << "Keep Speed" << endl; 
+  return ReturnCode::SUCCESS;
+}
+
+ReturnCode PathPlanner::actChangeSpeed(double start_s_dot, double goal_s_dot)
+{ 
+ 
+  if (trajectory_status == INIT)
+  {
+    
+    this->trajectory = new EasingTrajectory();
+
+    trajectory->init_s_dot(start_s_dot, goal_s_dot);
+    trajectory_status = RUNNING;
+  }
+
+  ReturnCode trajectory_result = trajectory->generate_s_dot();
+  cout << "Trajectory generated s_dot: " << trajectory->get_s_dot() << endl;
+
+  if (trajectory_result == ReturnCode::SUCCESS)
+  {
+    delete this->trajectory;
+    trajectory_status = INIT;
+  }
+
+  return trajectory_result;
+  // return ReturnCode::SUCCESS;
+}
+
+ReturnCode PathPlanner::actChangeToMaxSpeed()
+{
+  cout << "Chg to max Speed" << endl; 
+
+  double car_speed = this->this_veh._v;
+
+  double car_s_dot = car_speed / 50.0;
+  double max_s_dot = max_speed / 50.0;
+
+  return actChangeSpeed(car_s_dot, max_s_dot);
+}
+
+ReturnCode PathPlanner::actChangeToRefSpeed()
+{ 
+  cout << "Chg to ref Speed" << endl; 
+
+  double car_speed = this->this_veh._v;
+
+  double car_s_dot = car_speed / 50.0;
+  double ref_s_dot = ref_speed / 50.0;
+
+  return actChangeSpeed(car_s_dot, ref_s_dot);
+  
+}
+
+ReturnCode PathPlanner::actChangeToLeft()
+{
+  cout << "Change lane to left" << endl;
+  return ReturnCode::SUCCESS;
+}
+
+ReturnCode PathPlanner::actChangeToRight()
+{
+  cout << "Change lane to right" << endl;
+  return ReturnCode::SUCCESS;
 }
