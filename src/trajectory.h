@@ -22,8 +22,8 @@ public:
 	Trajectory() {};
 	~Trajectory() {};
 	
-	void init_s_dot(double start_s_dot, double goal_s_dot);
-	void init_d(double start_d, double goal_d);
+	void init_s_dot(double, double);
+	void init_d(double, double);
 
 	virtual ReturnCode generate_s_dot() {};
 	virtual ReturnCode generate_d() {};

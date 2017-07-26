@@ -5,143 +5,11 @@
 PathPlanner::PathPlanner()
 {
 	
-  	// status = CHNG_SPEED;
-  	status = NO_CHNG;
-  	mod_status = INIT;
-    trajectory_status = INIT;
+  trajectory_status = INIT;
   	
 }
 
-bool PathPlanner::IsNoChange()
-{
-	return status == NO_CHNG;
-}
 
-bool PathPlanner::IsChangeSpeed()
-{
-	return status == CHNG_SPEED;
-}
-
-void PathPlanner::SetChangeSpeed(double goal_inc)
-{
-	status = CHNG_SPEED;
-	mod_status = INIT;
-	this->goal_inc = goal_inc;
-
-	start_inc = dist_inc;
-	mod_status = RUNNING;
-
-	if (goal_inc > start_inc)
-	{
-		sp_status = SPEED_UP;
-		subd = (goal_inc - start_inc) * 500;
-	}
-	else
-	{
-		sp_status = SLOW_DOWN;
-		subd = (start_inc - goal_inc) * 500;
-	}
-
-	p = 0.0;
- 
-  cout << "SET CHNG_SPEED" << endl;
-
-}
-
-void PathPlanner::ChangeSpeed()
-{
-    
-    cout << " dist_inc: " << dist_inc << " goal_inc: " << goal_inc << " start_inc: " << start_inc << " p: " << p << endl;
-
-    if ((sp_status == SPEED_UP) and (p < 1.0))
-    {
-      
-    	p = p + (1.0/subd);
-
-    	dist_inc = start_inc + (0.5 * (1 - cos(p * M_PI)) * (goal_inc - start_inc) );
-
-    	// dist_inc += 0.005;
-      
-    }
-    else if ((sp_status == SLOW_DOWN) and (p < 1.0))
-    {
-
-    	p = p + (1.0/subd);
-
-    	dist_inc = start_inc - (0.5 * (1 - cos(p * M_PI)) * (start_inc - goal_inc) );
-    }
-
-    else
-    {
-      status = NO_CHNG;
-      mod_status = INIT;
-    }
-}
-
-
-bool PathPlanner::IsChangeLane()
-{
-	return status == CHNG_LANE;
-}
-
-void PathPlanner::SetChangeLane(double goal_d)
-{
-
-	status = CHNG_LANE;
-	mod_status = INIT;
-	this->goal_d = goal_d;
-
-	start_d = d;
-	mod_status = RUNNING;
-
-	if (goal_d > start_d)
-	{
-		lc_status = CHG_RIGHT;
-		subd = (goal_d - start_d) * 30;
-	}
-	else
-	{
-		lc_status = CHG_LEFT;
-		subd = (start_d - goal_d) * 30;
-	}
-
-	p = 0.0;
-  cout << "SET CHNG_LANE" << endl;
-
-}
-void PathPlanner::ChangeLane()
-{
-
-	cout << " d: " << d << " goal_d: " << goal_d << " start_d: " << start_d << " p: " << p << endl;
-
-    if ((lc_status == CHG_RIGHT) and (p < 1.0))
-    {
-      
-    	// p = p + (1.0/50.0);
-    	p = p + (1.0/subd);
-
-    	d = start_d + (0.5 * (1 - cos(p * M_PI)) * (goal_d - start_d) );
-
-    	// dist_inc += 0.005;
-      
-    }
-    else if ((lc_status == CHG_LEFT) and (p < 1.0))
-    {
-
-    	// p = p + (1.0/50.0);
-    	p = p + (1.0/subd);
-
-    	d = start_d - (0.5 * (1 - cos(p * M_PI)) * (start_d - goal_d) );
-    }
-
-    else
-    {
-      status = NO_CHNG;
-      mod_status = INIT;
-    }
-
-
-}
 
 void PathPlanner::findClosestVeh()
 {
@@ -367,9 +235,11 @@ bool PathPlanner::predCarInFrontDiffSpeed()
   cout << "veh_speed: " << veh_speed << endl;
 
   // if(abs(car_speed - veh_speed) > 0.5)
-  if(abs(car_speed - veh_speed) > 1.5)
+  // if(abs(car_speed - veh_speed) > 1.5)
+  if((veh_speed - 1.5) < car_speed)
   {
-    this->ref_speed = veh_speed;
+    // this->ref_speed = veh_speed;
+    this->ref_speed = veh_speed - 1.8;
     return true;  
   }
   else
