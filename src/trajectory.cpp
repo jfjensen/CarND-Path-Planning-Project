@@ -43,6 +43,7 @@ ReturnCode EasingTrajectory::generate_s_dot()
 
     else
     {
+      curr_s_dot = goal_s_dot;
       return ReturnCode::SUCCESS;
     }
 

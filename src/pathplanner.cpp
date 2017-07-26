@@ -366,7 +366,8 @@ bool PathPlanner::predCarInFrontDiffSpeed()
   cout << "car_speed: " << car_speed << endl;
   cout << "veh_speed: " << veh_speed << endl;
 
-  if(abs(car_speed - veh_speed) > 0.5)
+  // if(abs(car_speed - veh_speed) > 0.5)
+  if(abs(car_speed - veh_speed) > 1.5)
   {
     this->ref_speed = veh_speed;
     return true;  
@@ -387,7 +388,8 @@ bool PathPlanner::predLessThMaxSpeed()
   cout << "car_speed: " << car_speed << endl;
   cout << "max_speed: " << max_speed << endl;
 
-  if (abs(car_speed-max_speed) > 0.5)
+  // if (abs(car_speed-max_speed) > 0.5)
+  if (abs(car_speed-max_speed) > 1.5)
   {
     return true;
   }
@@ -509,7 +511,10 @@ ReturnCode PathPlanner::actChangeSpeed(double start_s_dot, double goal_s_dot)
   }
 
   ReturnCode trajectory_result = trajectory->generate_s_dot();
-  cout << "Trajectory generated s_dot: " << trajectory->get_s_dot() << endl;
+
+  this->dist_inc = trajectory->get_s_dot();
+
+  cout << "Trajectory generated s_dot: " << dist_inc << endl;
 
   if (trajectory_result == ReturnCode::SUCCESS)
   {
@@ -525,7 +530,7 @@ ReturnCode PathPlanner::actChangeToMaxSpeed()
 {
   cout << "Chg to max Speed" << endl; 
 
-  double car_speed = this->this_veh._v;
+  double car_speed = this_veh._v;
 
   double car_s_dot = car_speed / 50.0;
   double max_s_dot = max_speed / 50.0;
@@ -559,7 +564,10 @@ ReturnCode PathPlanner::actChangeLane(double start_d, double goal_d)
   }
 
   ReturnCode trajectory_result = trajectory->generate_d();
-  cout << "Trajectory generated d: " << trajectory->get_d() << endl;
+
+  this->d = trajectory->get_d();
+
+  cout << "Trajectory generated d: " << d << endl;
 
   if (trajectory_result == ReturnCode::SUCCESS)
   {

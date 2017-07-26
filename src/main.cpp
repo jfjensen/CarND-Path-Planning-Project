@@ -409,35 +409,35 @@ int main() {
           	vector<double> next_x_vals;
           	vector<double> next_y_vals;
 
-            std::cout << "#" << count << " >> Car x: " << car_x << " y: " << car_y << " s: " << car_s << " d: " << car_d;
-            std::cout << " yaw: " << car_yaw << " speed: " << car_speed << std::endl;
+            std::cout << "#" << count << " >> Car s: " << car_s << " d: " << car_d;
+            std::cout << " yaw: " << car_yaw << " speed mph: " << car_speed << "speed ms: " <<  mph_to_ms(car_speed) << std::endl;
             count++;
 
-            enum LANE_ID { LEFT, MID, RIGHT };
-            LANE_ID car_lane;
-            if (car_d < 4.0)
-            {
-              car_lane = LEFT;
-            }
-            else if ((car_d >= 4.0) and (car_d < 8.0))
-            {
-              car_lane = MID;
-            }
-            else
-            {
-              car_lane = RIGHT;
-            }
+            // enum LANE_ID { LEFT, MID, RIGHT };
+            // LANE_ID car_lane;
+            // if (car_d < 4.0)
+            // {
+            //   car_lane = LEFT;
+            // }
+            // else if ((car_d >= 4.0) and (car_d < 8.0))
+            // {
+            //   car_lane = MID;
+            // }
+            // else
+            // {
+            //   car_lane = RIGHT;
+            // }
 
             int sf_len = sensor_fusion.size();
             // std::cout << "sf_len: " << sf_len << std::endl;
 
-            vector<Vehicle> leftlane_infront;
-            vector<Vehicle> midlane_infront;
-            vector<Vehicle> rightlane_infront;
+            // vector<Vehicle> leftlane_infront;
+            // vector<Vehicle> midlane_infront;
+            // vector<Vehicle> rightlane_infront;
 
-            vector<Vehicle> leftlane_behind;
-            vector<Vehicle> midlane_behind;
-            vector<Vehicle> rightlane_behind;
+            // vector<Vehicle> leftlane_behind;
+            // vector<Vehicle> midlane_behind;
+            // vector<Vehicle> rightlane_behind;
 
             vector<Vehicle> veh_vector;
 
@@ -457,63 +457,63 @@ int main() {
               Vehicle veh (item_x, item_y, item_v, item_s, item_d, item_dist);
               veh_vector.push_back(veh);
 
-              // only look at car if close...
-              if (item_dist < 40) //60)
-              {
+              // // only look at car if close...
+              // if (item_dist < 40) //60)
+              // {
                   
-                  //veh_vector.push_back(veh);
-                  // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
+              //     //veh_vector.push_back(veh);
+              //     // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
 
-                  // is this car left lane?
-                  if ((item_d < 4.0))
-                  {
+              //     // is this car left lane?
+              //     if ((item_d < 4.0))
+              //     {
                     
-                    // is the car in front of us?
-                    if (item_s > car_s)
-                    {
-                        leftlane_infront.push_back(veh);                      
-                    }
-                    // or behind us?
-                    else
-                    {
-                        leftlane_behind.push_back(veh);
-                    }
+              //       // is the car in front of us?
+              //       if (item_s > car_s)
+              //       {
+              //           leftlane_infront.push_back(veh);                      
+              //       }
+              //       // or behind us?
+              //       else
+              //       {
+              //           leftlane_behind.push_back(veh);
+              //       }
   
-                  }
-                  // or is this car in middle lane?
-                  else if ((item_d >= 4.0) and (item_d < 8.0) )
-                  {
+              //     }
+              //     // or is this car in middle lane?
+              //     else if ((item_d >= 4.0) and (item_d < 8.0) )
+              //     {
                     
-                    // is the car in front of us?
-                    if (item_s > car_s)
-                    {
-                        midlane_infront.push_back(veh);                      
-                    }
-                    // or behind us?
-                    else
-                    {
-                        midlane_behind.push_back(veh);
-                    }
+              //       // is the car in front of us?
+              //       if (item_s > car_s)
+              //       {
+              //           midlane_infront.push_back(veh);                      
+              //       }
+              //       // or behind us?
+              //       else
+              //       {
+              //           midlane_behind.push_back(veh);
+              //       }
   
-                  }
-                  // or is this car in right lane?
-                  else
-                  {
+              //     }
+              //     // or is this car in right lane?
+              //     else
+              //     {
                     
-                    // is the car in front of us?
-                    if (item_s > car_s)
-                    {
-                        rightlane_infront.push_back(veh);                      
-                    }
-                    // or behind us?
-                    else
-                    {
-                        rightlane_behind.push_back(veh);
-                    }
+              //       // is the car in front of us?
+              //       if (item_s > car_s)
+              //       {
+              //           rightlane_infront.push_back(veh);                      
+              //       }
+              //       // or behind us?
+              //       else
+              //       {
+              //           rightlane_behind.push_back(veh);
+              //       }
   
-                  }
+              //     }
 
-              }
+              // }
               
             }
 
@@ -582,7 +582,7 @@ int main() {
                 double pos_y2 = previous_path_y[path_size-2];
                 angle = atan2(pos_y-pos_y2,pos_x-pos_x2);
 
-                cout << "pos_x: " << pos_x << " pos_y: " << pos_y << endl;
+                // cout << "pos_x: " << pos_x << " pos_y: " << pos_y << endl;
 
             }
 
@@ -605,247 +605,247 @@ int main() {
                 selector_root->tick();
 
 
-                if (pp.IsChangeSpeed())
-                {
-                    pp.ChangeSpeed();
-                }
+                // if (pp.IsChangeSpeed())
+                // {
+                //     pp.ChangeSpeed();
+                // }
 
-                else if (pp.IsChangeLane())
-                {
-                    pp.ChangeLane();
-                }
+                // else if (pp.IsChangeLane())
+                // {
+                //     pp.ChangeLane();
+                // }
 
 
-                else //if (pp.IsNoChange())
-                {
+                // else //if (pp.IsNoChange())
+                // {
                   
-                  if(car_lane == LEFT)
-                  {
+                //   if(car_lane == LEFT)
+                //   {
 
-                    if (leftlane_infront.size() == 0)
-                    {
+                //     if (leftlane_infront.size() == 0)
+                //     {
                        
-                      if (pp.dist_inc < 0.40)//0.42)
-                      {
-                       cout << "SetChangeSpeed 0.41" << endl;
-                       pp.SetChangeSpeed(0.41);
-                      }
+                //       if (pp.dist_inc < 0.40)//0.42)
+                //       {
+                //        cout << "SetChangeSpeed 0.41" << endl;
+                //        pp.SetChangeSpeed(0.41);
+                //       }
 
-                    }
-                    else
-                    {
-                      cout << "LEFT else..." << endl;
+                //     }
+                //     else
+                //     {
+                //       cout << "LEFT else..." << endl;
 
-                      double v;
-                      bool b= false;
+                //       double v;
+                //       bool b= false;
                       
-                      if (midlane_behind.size() > 0)
-                      {
-                        Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
-                        Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
-                        v = v_veh._v;
+                //       if (midlane_behind.size() > 0)
+                //       {
+                //         Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
+                //         Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
+                //         v = v_veh._v;
                         
-                        if (dist_veh._dist > 15)
-                        {
-                          b = true;
-                        }
+                //         if (dist_veh._dist > 15)
+                //         {
+                //           b = true;
+                //         }
 
                         
-                      }
+                //       }
                       
-                      if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
-                      {
-                        cout << "LEFT else... 1" << endl;
-                        pp.SetChangeLane(6.0);
-                      }
-                      else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
-                      {
-                        cout << "LEFT else... 2" << endl;
-                        pp.SetChangeLane(6.0);
+                //       if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
+                //       {
+                //         cout << "LEFT else... 1" << endl;
+                //         pp.SetChangeLane(6.0);
+                //       }
+                //       else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
+                //       {
+                //         cout << "LEFT else... 2" << endl;
+                //         pp.SetChangeLane(6.0);
 
-                      }
-                      else if (pp.dist_inc > 0.21)
-                      {
-                        cout << "LEFT else... 3" << endl;
-                        // double lowest_speed;
-                        // lowest_speed = *min_element(leftlane_infront.begin(), leftlane_infront.end());
-                        // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+                //       }
+                //       else if (pp.dist_inc > 0.21)
+                //       {
+                //         cout << "LEFT else... 3" << endl;
+                //         // double lowest_speed;
+                //         // lowest_speed = *min_element(leftlane_infront.begin(), leftlane_infront.end());
+                //         // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
                         
-                        // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+                //         // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
 
-                        // if (not(new_dist_inc == pp.dist_inc))
-                        // {
-                        //   pp.SetChangeSpeed(new_dist_inc);
-                        // }
-                        pp.SetChangeSpeed(0.2);
-                      }
-                      else
-                      {
-                        cout << "LEFT else... 4" << endl;
-                      }
-                    }
-                  }
-                  else if (car_lane == MID)
-                  {
+                //         // if (not(new_dist_inc == pp.dist_inc))
+                //         // {
+                //         //   pp.SetChangeSpeed(new_dist_inc);
+                //         // }
+                //         pp.SetChangeSpeed(0.2);
+                //       }
+                //       else
+                //       {
+                //         cout << "LEFT else... 4" << endl;
+                //       }
+                //     }
+                //   }
+                //   else if (car_lane == MID)
+                //   {
 
-                    if (midlane_infront.size() == 0)
-                    {
-                      if (pp.dist_inc < 0.40)//0.42)
-                      {
-                       cout << "SetChangeSpeed 0.41" << endl;
-                       pp.SetChangeSpeed(0.41);
-                      }
-                    }
-                    else
-                    {
+                //     if (midlane_infront.size() == 0)
+                //     {
+                //       if (pp.dist_inc < 0.40)//0.42)
+                //       {
+                //        cout << "SetChangeSpeed 0.41" << endl;
+                //        pp.SetChangeSpeed(0.41);
+                //       }
+                //     }
+                //     else
+                //     {
                       
-                      cout << "MID else..." << endl;
-                      double v_l, v_r;
-                      bool b_l= false;
-                      bool b_r =false;
-                      if (leftlane_behind.size() > 0)
-                      {
+                //       cout << "MID else..." << endl;
+                //       double v_l, v_r;
+                //       bool b_l= false;
+                //       bool b_r =false;
+                //       if (leftlane_behind.size() > 0)
+                //       {
                         
-                        Vehicle v_veh_l = *max_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::faster);
-                        Vehicle dist_veh = *min_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::closer);
-                        v_l = v_veh_l._v;
+                //         Vehicle v_veh_l = *max_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::faster);
+                //         Vehicle dist_veh = *min_element(leftlane_behind.begin(), leftlane_behind.end(), Vehicle::closer);
+                //         v_l = v_veh_l._v;
 
-                        if(dist_veh._dist > 15)
-                        {
-                          b_l = true;  
-                        }
+                //         if(dist_veh._dist > 15)
+                //         {
+                //           b_l = true;  
+                //         }
                         
-                      }
-                      if (rightlane_behind.size() > 0)
-                      {
+                //       }
+                //       if (rightlane_behind.size() > 0)
+                //       {
                         
-                        Vehicle v_veh_r = *max_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::faster);
-                        Vehicle dist_veh = *min_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::closer);
-                        v_r = v_veh_r._v;
+                //         Vehicle v_veh_r = *max_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::faster);
+                //         Vehicle dist_veh = *min_element(rightlane_behind.begin(), rightlane_behind.end(), Vehicle::closer);
+                //         v_r = v_veh_r._v;
 
-                        if(dist_veh._dist > 15)
-                        {
-                          b_r = true;  
-                        }
+                //         if(dist_veh._dist > 15)
+                //         {
+                //           b_r = true;  
+                //         }
                         
                         
-                      }
+                //       }
 
-                      if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
-                      {
+                //       if ((leftlane_infront.size() == 0) and (leftlane_behind.size() == 0))
+                //       {
                         
-                        cout << "MID else... 1" << endl;
-                        pp.SetChangeLane(2.0);
-                      }
-                      else if (((leftlane_infront.size() == 0) and (b_l)) and (mph_to_ms(car_speed) > v_l))
-                      {
+                //         cout << "MID else... 1" << endl;
+                //         pp.SetChangeLane(2.0);
+                //       }
+                //       else if (((leftlane_infront.size() == 0) and (b_l)) and (mph_to_ms(car_speed) > v_l))
+                //       {
                         
-                        cout << "MID else... 2" << endl;
-                        pp.SetChangeLane(2.0);
+                //         cout << "MID else... 2" << endl;
+                //         pp.SetChangeLane(2.0);
 
-                      }
-                      else if ((rightlane_infront.size() == 0)and (rightlane_behind.size() == 0))
-                      {
+                //       }
+                //       else if ((rightlane_infront.size() == 0)and (rightlane_behind.size() == 0))
+                //       {
                         
-                        cout << "MID else... 3" << endl;
-                        pp.SetChangeLane(10.0);
-                      }
+                //         cout << "MID else... 3" << endl;
+                //         pp.SetChangeLane(10.0);
+                //       }
 
-                      else if (((rightlane_infront.size() == 0) and (b_r)) and (mph_to_ms(car_speed) > v_r))
-                      {
+                //       else if (((rightlane_infront.size() == 0) and (b_r)) and (mph_to_ms(car_speed) > v_r))
+                //       {
                         
-                        cout << "MID else... 4" << endl;
-                        pp.SetChangeLane(10.0);
+                //         cout << "MID else... 4" << endl;
+                //         pp.SetChangeLane(10.0);
 
-                      }
-                      else if (pp.dist_inc > 0.21)
-                      {
-                        cout << "MID else... 5" << endl;
-                        // double lowest_speed;
-                        // lowest_speed = *min_element(midlane_infront.begin(), midlane_infront.end());
-                        // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+                //       }
+                //       else if (pp.dist_inc > 0.21)
+                //       {
+                //         cout << "MID else... 5" << endl;
+                //         // double lowest_speed;
+                //         // lowest_speed = *min_element(midlane_infront.begin(), midlane_infront.end());
+                //         // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
 
-                        // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+                //         // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
 
-                        // if (not(new_dist_inc == pp.dist_inc))
-                        // {
-                        //   pp.SetChangeSpeed(new_dist_inc);
-                        // }
-                        pp.SetChangeSpeed(0.2);
-                      }
-                      else
-                      {
-                        cout << "MID else... 6" << endl;
-                      }
-                    }
-                  }
-                  else if (car_lane == RIGHT)
-                  {
+                //         // if (not(new_dist_inc == pp.dist_inc))
+                //         // {
+                //         //   pp.SetChangeSpeed(new_dist_inc);
+                //         // }
+                //         pp.SetChangeSpeed(0.2);
+                //       }
+                //       else
+                //       {
+                //         cout << "MID else... 6" << endl;
+                //       }
+                //     }
+                //   }
+                //   else if (car_lane == RIGHT)
+                //   {
                       
-                      if (rightlane_infront.size() == 0)
-                      {
-                        if (pp.dist_inc < 0.40)//0.42)
-                        {
-                         cout << "SetChangeSpeed 0.41" << endl;
-                         pp.SetChangeSpeed(0.41);
-                        }  
-                      }
-                      else
-                      {
-                        cout << "RIGHT else..." << endl;
-                        double v;
-                        bool b = false;
+                //       if (rightlane_infront.size() == 0)
+                //       {
+                //         if (pp.dist_inc < 0.40)//0.42)
+                //         {
+                //          cout << "SetChangeSpeed 0.41" << endl;
+                //          pp.SetChangeSpeed(0.41);
+                //         }  
+                //       }
+                //       else
+                //       {
+                //         cout << "RIGHT else..." << endl;
+                //         double v;
+                //         bool b = false;
                       
-                        if (midlane_behind.size() > 0)
-                        {
-                          Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
-                          Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
-                          v = v_veh._v;
+                //         if (midlane_behind.size() > 0)
+                //         {
+                //           Vehicle v_veh = *max_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::faster);
+                //           Vehicle dist_veh = *min_element(midlane_behind.begin(), midlane_behind.end(), Vehicle::closer);
+                //           v = v_veh._v;
 
-                          if (dist_veh._dist > 15)
-                          {
-                            b=true;
-                          }
+                //           if (dist_veh._dist > 15)
+                //           {
+                //             b=true;
+                //           }
                           
-                        }
+                //         }
 
-                        if ((midlane_infront.size() == 0)and (midlane_behind.size() == 0))
-                        {
-                          cout << "RIGHT else... 1" << endl;
-                          pp.SetChangeLane(6.0);
-                        }
-                        else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
-                        {
-                          cout << "RIGHT else... 2" << endl;
-                          pp.SetChangeLane(6.0);
+                //         if ((midlane_infront.size() == 0)and (midlane_behind.size() == 0))
+                //         {
+                //           cout << "RIGHT else... 1" << endl;
+                //           pp.SetChangeLane(6.0);
+                //         }
+                //         else if (((midlane_infront.size() == 0) and (b)) and (mph_to_ms(car_speed) > v))
+                //         {
+                //           cout << "RIGHT else... 2" << endl;
+                //           pp.SetChangeLane(6.0);
 
-                        }
-                        else if (pp.dist_inc > 0.21)
-                        {
-                          cout << "RIGHT else... 3" << endl;
-                          // double lowest_speed;
-                          // lowest_speed = *min_element(rightlane_infront.begin(), rightlane_infront.end());
-                          // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
+                //         }
+                //         else if (pp.dist_inc > 0.21)
+                //         {
+                //           cout << "RIGHT else... 3" << endl;
+                //           // double lowest_speed;
+                //           // lowest_speed = *min_element(rightlane_infront.begin(), rightlane_infront.end());
+                //           // double new_dist_inc = (pp.dist_inc * lowest_speed)/mph_to_ms(car_speed);
 
-                          // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
+                //           // cout << "lowest: " << lowest_speed << " new_i: " << new_dist_inc << endl;
 
-                          // if (not(new_dist_inc == pp.dist_inc))
-                          // {
-                          //   pp.SetChangeSpeed(new_dist_inc);
-                          // }
-                          pp.SetChangeSpeed(0.2);
-                        }
-                        else
-                        {
-                          cout << "RIGHT else... 4" << endl;
-                        }
-                      }
+                //           // if (not(new_dist_inc == pp.dist_inc))
+                //           // {
+                //           //   pp.SetChangeSpeed(new_dist_inc);
+                //           // }
+                //           pp.SetChangeSpeed(0.2);
+                //         }
+                //         else
+                //         {
+                //           cout << "RIGHT else... 4" << endl;
+                //         }
+                //       }
                       
-                  }
+                //   }
 
 
 
-                }
+                // }
 
 
                 pos_s += pp.dist_inc;
