@@ -231,9 +231,6 @@ int main() {
   map_waypoints_dx.push_back(map_waypoints_dx[1]);
   map_waypoints_dy.push_back(map_waypoints_dy[1]);
 
-  // enum STATUS { SPEED_UP_TO, SLOW_DOWN_TO, KEEP_SPEED };
-
-  // double goal_speed = 42.0;
 
   std::cout << "waypoints size: " << map_waypoints_x.size() << std::endl;
 
@@ -250,33 +247,13 @@ int main() {
   tk::spline WP_spline_dy;
   WP_spline_dy.set_points(map_waypoints_s, map_waypoints_dy);
 
-  // STATUS status;
-  // status = SPEED_UP_TO;
-  // double dist_inc;
-
-
-// bool predCarInFront();
-//   bool predCarInFrontDiffSpeed();
-//   bool predMaxSpeed();
-
-//   bool predExistLaneToLeft();
-//   bool predExistLaneToRight();
-
-//   bool predChangeToLeft();
-//   bool predChangeToRight();
-
-  // ReturnCode actKeepSpeed()
-  // ReturnCode actChangeToMaxSpeed()
-  // ReturnCode actChangeToRefSpeed()
-  // ReturnCode actChangeToLeft()
-  // ReturnCode actChangeToRight()
 
 
   PathPlanner pp;
   pp.dist_inc = 0.00;
   pp.d = 6.0;
   pp.setMaxSpeed(mph_to_ms(46));
-  // pp.SetChangeSpeed(0.42);
+  
 
   // https://stackoverflow.com/questions/12662891/passing-a-member-function-as-an-argument-in-c
   // http://en.cppreference.com/w/cpp/utility/functional/bind
@@ -438,7 +415,7 @@ int main() {
 
             pp.setVehicle(this_veh);
             pp.setVehicleVector(veh_vector);
-            pp.findClosestVeh();
+            // pp.findClosestVeh();
 
            
             double pos_x;
@@ -485,7 +462,11 @@ int main() {
                        
             for(int i = 0; i < 50-path_size; i++)
             {    
+                int ticks_ahead = path_size + i;
 
+                cout << "Ticks ahead: " << ticks_ahead << endl;
+
+                pp.findClosestVeh(ticks_ahead);
                 selector_root->tick();
 
                 pos_s += pp.dist_inc;

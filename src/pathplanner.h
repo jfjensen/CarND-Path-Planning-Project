@@ -18,19 +18,14 @@ class PathPlanner
 private:
 
 	enum MODL_STATUS { INIT, RUNNING, COMPLETE };
-	// MODL_STATUS mod_status;
 	MODL_STATUS trajectory_status;
 
-	// enum SPEED_CHG_STATUS { SLOW_DOWN, SPEED_UP };
-	// SPEED_CHG_STATUS sp_status;
-
-	// enum LANE_CHG_STATUS {  CHG_LEFT, CHG_RIGHT };
-	// LANE_CHG_STATUS	lc_status;
-	
-	// double p;
-
+	double car_speed;
 	double max_speed;
 	double ref_speed;
+
+	double start_car_d;
+	double goal_car_d;
 
 	Vehicle this_veh;
 
@@ -53,20 +48,10 @@ public:
 	PathPlanner();
 	~PathPlanner() {};
 
-	// bool IsNoChange();
-
-	// bool IsChangeSpeed();
-	// void SetChangeSpeed(double goal_inc);
-	// void ChangeSpeed();
-
-	// bool IsChangeLane();
-	// void SetChangeLane(double goal_d);
-	// void ChangeLane();
-
 	void setMaxSpeed(double max_speed) { this->max_speed = max_speed; };
 	void setVehicle(Vehicle);
 	void setVehicleVector(vector<Vehicle> veh_vec) { this->veh_vec = veh_vec; };
-	void findClosestVeh();
+	void findClosestVeh(int);
 
 	bool predCarInFront();
 	bool predCarInFrontDiffSpeed();
@@ -87,19 +72,10 @@ public:
 	ReturnCode actChangeSpeed(double, double);
 	ReturnCode actChangeLane(double, double);
 
-	/* data */
-	// enum STATUS { CHNG_SPEED, CHNG_LANE, NO_CHNG };
-	// STATUS status;
-
-  	// double goal_inc;
-  	// double start_inc;
   	double dist_inc;
-
-  	// double goal_d;
-  	// double start_d;
   	double d;
   	
-  	double subd;
+  	// double subd;
 };
 
 #endif // PATHPLANNER_H
