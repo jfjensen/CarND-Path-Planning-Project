@@ -14,7 +14,10 @@ PathPlanner::PathPlanner()
 void PathPlanner::findClosestVeh(int ticks_ahead)
 {
   
-  double car_s = this_veh._s;
+  
+  this->ticks_ahead = ticks_ahead;
+
+  double car_s = this_veh._s + (ticks_ahead * dist_inc);
 
   leftlane_infront.clear();
   midlane_infront.clear();
@@ -28,17 +31,18 @@ void PathPlanner::findClosestVeh(int ticks_ahead)
   {
 
     Vehicle item = veh_vec[i];
-    double item_s = item._s;
+    double item_dist_inc = item._v / 50.0;
+    
+    double item_s = item._s + (ticks_ahead * item_dist_inc);
     double item_d = item._d;
+    
     double item_dist = item._dist;
+
 
     // only look at car if close...
     if (item_dist < 40) //60)
     {
         
-        //veh_vector.push_back(veh);
-        // std::cout << item << " v: " << item_v << " dist: " << item_dist << std::endl;
-
         // is this car left lane?
         if ((item_d < 4.0))
         {
@@ -49,7 +53,7 @@ void PathPlanner::findClosestVeh(int ticks_ahead)
               leftlane_infront.push_back(item);                      
           }
           // or behind us?
-          else
+          else if (item_dist < 15)
           {
               leftlane_behind.push_back(item);
           }
@@ -65,7 +69,7 @@ void PathPlanner::findClosestVeh(int ticks_ahead)
               midlane_infront.push_back(item);                      
           }
           // or behind us?
-          else
+          else if (item_dist < 15)
           {
               midlane_behind.push_back(item);
           }
@@ -81,7 +85,7 @@ void PathPlanner::findClosestVeh(int ticks_ahead)
               rightlane_infront.push_back(item);                      
           }
           // or behind us?
-          else
+          else if (item_dist < 15)
           {
               rightlane_behind.push_back(item);
           }
@@ -187,8 +191,6 @@ bool PathPlanner::predCarInFront()
 bool PathPlanner::predCarInFrontDiffSpeed()
 {
 
-  // double car_speed = this->this_veh._v;
-
   double veh_speed = car_speed;
 
 
@@ -235,9 +237,7 @@ bool PathPlanner::predCarInFrontDiffSpeed()
   cout << "car_speed: " << car_speed << endl;
   cout << "veh_speed: " << veh_speed << endl;
 
-  // if(abs(car_speed - veh_speed) > 0.5)
-  // if(abs(car_speed - veh_speed) > 1.5)
-  // if((veh_speed - 1.5) < car_speed)
+  
   if((veh_speed - 0.5) < car_speed)
   {
     // this->ref_speed = veh_speed;
@@ -253,14 +253,9 @@ bool PathPlanner::predCarInFrontDiffSpeed()
 
 bool PathPlanner::predLessThMaxSpeed()
 {
-  
-
-  // double car_speed = this->this_veh._v;
-
   cout << "car_speed: " << car_speed << endl;
   cout << "max_speed: " << max_speed << endl;
 
-  // if (abs(car_speed-max_speed) > 0.5)
   if (abs(car_speed-max_speed) > 1.5)
   {
     return true;
@@ -411,14 +406,11 @@ ReturnCode PathPlanner::actChangeSpeed(double start_s_dot, double goal_s_dot)
   }
 
   return trajectory_result;
-  // return ReturnCode::SUCCESS;
 }
 
 ReturnCode PathPlanner::actChangeToMaxSpeed()
 {
   cout << "Chg to max Speed" << endl; 
-
-  // double car_speed = this_veh._v;
 
   double car_s_dot = car_speed / 50.0;
   double max_s_dot = max_speed / 50.0;
@@ -430,13 +422,10 @@ ReturnCode PathPlanner::actChangeToRefSpeed()
 { 
   cout << "Chg to ref Speed" << endl; 
 
-  // double car_speed = this->this_veh._v;
-
   double car_s_dot = car_speed / 50.0;
   double ref_s_dot = ref_speed / 50.0;
 
   return actChangeSpeed(car_s_dot, ref_s_dot);
-  
 }
 
 ReturnCode PathPlanner::actChangeLane(double start_d, double goal_d)
@@ -464,7 +453,6 @@ ReturnCode PathPlanner::actChangeLane(double start_d, double goal_d)
   }
 
   return trajectory_result;
-  // return ReturnCode::SUCCESS;
 }
 
 ReturnCode PathPlanner::actChangeToLeft()
@@ -473,10 +461,7 @@ ReturnCode PathPlanner::actChangeToLeft()
 
   double car_d = this_veh._d;
 
-  // return actChangeLane(car_d, car_d - 4.0);
   return actChangeLane(start_car_d, goal_car_d);
-
-  // return ReturnCode::SUCCESS;
 }
 
 ReturnCode PathPlanner::actChangeToRight()
@@ -485,7 +470,5 @@ ReturnCode PathPlanner::actChangeToRight()
 
   double car_d = this_veh._d;
 
-  // return actChangeLane(car_d, car_d + 4.0);
   return actChangeLane(start_car_d, goal_car_d);
-  // return ReturnCode::SUCCESS;
 }

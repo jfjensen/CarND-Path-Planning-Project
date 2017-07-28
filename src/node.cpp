@@ -3,7 +3,7 @@
 
 ReturnCode Conditional::tick()
 {
-	// return predicate();
+	
 	if (predicate())
 	{
 		cout << "predicate success" << endl;
@@ -19,14 +19,12 @@ ReturnCode Conditional::tick()
 ReturnCode Action::tick()
 {
 	return action();
-	// return ReturnCode::SUCCESS;
+	
 }
 
 ReturnCode Sequence::tick()
 {
 	
-	// cout << "Sequence Tick - " << children.size() << " children" << endl;
-
 	for (int i = currentChild; i < children.size(); ++i)
 	{
 		ReturnCode childstatus = children[i]->tick();
@@ -52,30 +50,25 @@ ReturnCode Sequence::tick()
 ReturnCode Selector::tick()
 {
 	
-	// cout << "Selector Tick - " << children.size() << " children" << endl;
-
 	for (int i = currentChild; i < children.size(); ++i)
 	{
 		ReturnCode childstatus = children[i]->tick();
-		//cout << "tick" << endl;
-
+		
 		currentChild = i;
 
 		if (childstatus == ReturnCode::RUNNING)
 		{
-			// cout << "running" << endl;
 			return ReturnCode::RUNNING;
 		}
 		else if (childstatus == ReturnCode::SUCCESS)
 		{
 			currentChild = 0;
-			// cout << "success" << endl;
 			return ReturnCode::SUCCESS;
 		}
 		
 	}
 	currentChild = 0;
-	// cout << "failure" << endl;
+	
 	return ReturnCode::FAILURE;
 
 };

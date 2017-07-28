@@ -27,9 +27,6 @@ ReturnCode EasingTrajectory::generate_s_dot()
 	if ((goal_s_dot > start_s_dot) and (p < 1.0))
     {
       
-      	// double subd = (goal_s_dot - start_s_dot) * 500;
-    	// p = p + (1.0/subd);
-
     	curr_s_dot = start_s_dot + (0.5 * (1 - cos(p * M_PI)) * (goal_s_dot - start_s_dot) );
 
     	return ReturnCode::RUNNING;
@@ -37,8 +34,6 @@ ReturnCode EasingTrajectory::generate_s_dot()
     }
     else if ((goal_s_dot < start_s_dot) and (p < 1.0))
     {
-    	// double subd = (start_s_dot - goal_s_dot) * 500;
-    	// p = p + (1.0/subd);
 
     	curr_s_dot = start_s_dot - (0.5 * (1 - cos(p * M_PI)) * (start_s_dot - goal_s_dot) );
 
@@ -47,7 +42,7 @@ ReturnCode EasingTrajectory::generate_s_dot()
 
     else
     {
-      // curr_s_dot = goal_s_dot;
+ 
       return ReturnCode::SUCCESS;
     }
 
@@ -64,9 +59,6 @@ ReturnCode EasingTrajectory::generate_d()
 	if ((goal_d > start_d) and (p < 1.0))
     {
       
-     //  	double subd = (goal_d - start_d) * 30;
-    	// p = p + (1.0/subd);
-
     	curr_d = start_d + (0.5 * (1 - cos(p * M_PI)) * (goal_d - start_d) );
 
     	return ReturnCode::RUNNING;
@@ -74,8 +66,6 @@ ReturnCode EasingTrajectory::generate_d()
     }
     else if ((goal_d < start_d) and (p < 1.0))
     {
-    	// double subd = (start_d - goal_d) * 30;
-    	// p = p + (1.0/subd);
 
     	curr_d = start_d - (0.5 * (1 - cos(p * M_PI)) * (start_d - goal_d) );
 

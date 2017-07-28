@@ -74,8 +74,9 @@ public:
 
   	double dist_inc;
   	double d;
+
+  	int ticks_ahead;
   	
-  	// double subd;
 };
 
 #endif // PATHPLANNER_H

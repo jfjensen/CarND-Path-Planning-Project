@@ -185,13 +185,10 @@ int main() {
   vector<double> map_waypoints_s;
   vector<double> map_waypoints_dx;
   vector<double> map_waypoints_dy;
-  // vector<double> map_waypoints_angle;
-
+  
   // Waypoint map to read from
   string map_file_ = "./data/highway_map.csv";
-  // // The max s value before wrapping around the track back to 0
-  // double max_s = 6945.554;
-
+ 
   ifstream in_map_(map_file_.c_str(), ifstream::in);
 
   string line;
@@ -212,7 +209,7 @@ int main() {
   	map_waypoints_s.push_back(s);
   	map_waypoints_dx.push_back(d_x);
   	map_waypoints_dy.push_back(d_y);
-    // map_waypoints_angle.push_back(pi()/2 + atan2(d_y,d_x));
+    
   }
 
   // The max s value before wrapping around the track back to 0
@@ -225,6 +222,7 @@ int main() {
   map_waypoints_s.push_back(max_s);
   map_waypoints_dx.push_back(map_waypoints_dx[0]);
   map_waypoints_dy.push_back(map_waypoints_dy[0]);
+  
   map_waypoints_x.push_back(map_waypoints_x[1]);
   map_waypoints_y.push_back(map_waypoints_y[1]);
   map_waypoints_s.push_back(max_s+map_waypoints_s[1]);

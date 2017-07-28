@@ -9,8 +9,6 @@
 
 using namespace std;
 
-//class BehaviorTree; // at this point we have an incomplete def. of 'BehaviorTree'
-// https://stackoverflow.com/questions/2133250/does-not-name-a-type-error
 
 class Node
 {
@@ -20,8 +18,7 @@ public:
 	Node(){};
 	~Node(){};
 
-	virtual ReturnCode tick(){ //cout << "node" << endl; 
-		};
+	virtual ReturnCode tick(){ };
 	
 };
 
@@ -51,13 +48,11 @@ class Conditional : public Leaf
 {
 private:
 	//http://www.learncpp.com/cpp-tutorial/78-function-pointers/
-	//function<ReturnCode()> predicate;
 	function<bool()> predicate;
 
 public:
 	Conditional(){};
 	Conditional(function<bool()> pred){ predicate = pred; };
-	//Conditional(function<ReturnCode()> pred){ predicate = pred; };
 	~Conditional(){};
 	ReturnCode tick();
 
@@ -69,7 +64,6 @@ public:
 class Composite : public Node
 {
 protected:
-	//bool resumable;
 	int currentChild;
 	vector<Node*> children;
 
