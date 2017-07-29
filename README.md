@@ -96,13 +96,13 @@ git checkout e94b6e1
 
 The model I have implemented uses a Behavior Tree which is used to determine the behavior of the autonomous vehicle. Every time a certain behavior is chosen, a Trajectory which executes that behavior, is constructed and carried out by the Path Planner.
 
-* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson. [PDF](https://www.google.be/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjdy8uinKTVAhXGcBoKHSJcCz0QFggzMAA&url=http%3A%2F%2Fwww.diva-portal.org%2Fsmash%2Fget%2Fdiva2%3A907048%2FFULLTEXT01.pdf&usg=AFQjCNEFT-Jl9WkK0B-Ycz0_e0IcD_Au1A)
-* The Trajectory is constructed using "SineInOut" easing functions. These functions are commonly used in computer animation.
+* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson [PDF](https://www.google.be/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjdy8uinKTVAhXGcBoKHSJcCz0QFggzMAA&url=http%3A%2F%2Fwww.diva-portal.org%2Fsmash%2Fget%2Fdiva2%3A907048%2FFULLTEXT01.pdf&usg=AFQjCNEFT-Jl9WkK0B-Ycz0_e0IcD_Au1A) . A Behavior Tree is an interesting solution given that it is easy to extend with new behaviors.
+* The Trajectory is constructed using a "SineEaseInOut" easing function; see [Github (lines 148-152)](https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c) . Easing functions are commonly used in computer animation. The chosen easing function seems to work just as fine as a Minimal Jerk Trajectory but is much simpler to implement.
 
 ### main.cpp
 
-##### Waypoints (lines 182-231)
-Saving the waypoint data from the supplied CSV file. Make sure to add 2 extra waypoints at the end of the track in order to 'close the loop.'
+##### Reading in waypoints (lines 182-231)
+Reading the waypoint data from the supplied CSV file. Make sure to add 2 extra waypoints at the end of the track in order to 'close the loop.'
 
 ##### Fitting splines to waypoints (lines 235-246)
 Creating 4 splines to fit the waypoint data:
@@ -112,10 +112,11 @@ Creating 4 splines to fit the waypoint data:
 4. Spline: $f(S) = dY$
 
 ##### Creating the PathPlanner object (lines 250-253)
-Initializing the `PathPlanner` object with a `distance increment` of `0.0` because the vehicle is standing still and with a `d value` of `6.0`, given that the vehicle is in the middle lane. The maximum speed is also set to 46 ms.
+Initializing the `PathPlanner` object with a `distance increment` of `0.0` because the vehicle is standing still and with a `frenet d value` of `6.0`, given that the vehicle is in the middle lane. The maximum speed is also set to 46 ms.
 
 ##### Building the Behavior Tree (lines 258-334)
-
+![](bt.jpg)
+The structure of the Behavior Tree can be seen in the diagram above. The code has been indented in order to reflect the structure.
 
 ##### Saving the data of the other vehicles in a vector (lines 396-412)
 
@@ -125,15 +126,31 @@ Initializing the `PathPlanner` object with a `distance increment` of `0.0` becau
 
 ##### Adding positions to the path plan (lines 461-488)
 
+A for loop is used to make sure that a path is projected 50 ticks out in the future.
+
+Finding the closest vehicles using the ticks ahead.
+
+The behavior tree is being run using `selector_root->tick()`. 
+
+The new  `distance increment` value is retrieved from the `PathPlanner` object. A modulo operator is applied to the `distance increment` in order to close the loop.
+
+Using the splines and the `frenet d value` in order to calculate the `x` and `y` position.
+
+
+
 ### pathplanner.cpp
 
 ##### Finding the closest vehicles (lines 14-120)
 
+...
+
 ##### Set the data of the autonomous vehicle (lines 132-145)
+
+Setting the autonomous vehicle speed in the `PathPlanner` object using the `distance increment` times the 50 frames per second rate. Here the lane of the vehicle is also determined.
 
 ##### Constructing the predicate "Is there a car in front?" (lines 150-189)
 
-##### Constructing the predicate "Does the car in front have a different speed?" (lines 191-252)
+##### Constructing the predicate "Does the car in front have a lower speed?" (lines 191-252)
 
 ##### Constructing the predicate "Is the car at less than maximum speed?" (lines 254-267)
 
@@ -143,16 +160,30 @@ Initializing the `PathPlanner` object with a `distance increment` of `0.0` becau
 
 ##### Constructing the action "Keep current speed (and lane)" (lines 378-382)
 
+No change in distance increment or lane.
+
 ##### Constructing the actions "Changing speed to maximum or reference" (lines 384-429)
+
+The methods `actChangeToMaxSpeed` and `actChangeToRefSpeed` call the `actChangeSpeed` method which is a general method for changing the speed of the vehicle. The latter method takes a start speed and a goal speed. First a Trajectory object is created and then it is initialized with the start and goal speeds. The PathPlanner object is now set to RUNNING. As long as it is running, it will tell the Trajectory object to generate a new `frenet s dot` value and retrieve it. The `distance increment` is set to the retrieved value. When the Trajectory object is finished generating `frenet s dot` values, the change speed method will return SUCCESS.
 
 #####  Constructing the actions "Changing lanes" (lines 431-474)
 
+The methods `actChangeSpeed` and `actChangeToRight` call the `actChangeLane` method which is a method for changing the lane. The process here is analogous to the above methods for changing the speed.
+
 ### trajectory.cpp
 
-##### Initializing the Trajectory object (lines 3-18)
+##### Initializing the `Trajectory` object (lines 3-18)
 
-##### Generating trajectory in terms of S dot using an easing function (lines 20-49)
+##### Generating trajectory in terms of frenet S dot using an easing function (lines 20-49)
 
-##### Generating trajectory in terms of D using an easing function (lines 51-80)
+##### Generating trajectory in terms of frenet D using an easing function (lines 51-80)
 
 ### node.cpp
+
+##### Implementing the `tick()` method for the `Conditional` class (lines 4-17)
+
+##### Implementing the `tick()` method for the `Action` class (lines 19-23)
+
+##### Implementing the `tick()` method for the `Sequence` class (lines 25-48)
+
+##### Implementing the `tick()` method for the `Selector` class (lines 50-74)
