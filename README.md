@@ -96,7 +96,7 @@ git checkout e94b6e1
 
 The model I have implemented is based on a Behavior Tree which is used to determine the behavior of the autonomous vehicle. Every time a certain behavior is chosen by the Behavior Tree, a Trajectory is constructed which executes that behavior.
 
-* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson [PDF](https://www.google.be/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjdy8uinKTVAhXGcBoKHSJcCz0QFggzMAA&url=http%3A%2F%2Fwww.diva-portal.org%2Fsmash%2Fget%2Fdiva2%3A907048%2FFULLTEXT01.pdf&usg=AFQjCNEFT-Jl9WkK0B-Ycz0_e0IcD_Au1A) . A Behavior Tree is an interesting solution for the following reasons:
+* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson [PDF](http://www.diva-portal.org/smash/get/diva2:907048/FULLTEXT01.pdf) . A Behavior Tree is an interesting solution for the following reasons:
   * It is easy to extend with new behaviors. Compared with an FSM it is much easier to extend and to maintain the source code.
   * It is also easier to determine which behaviors are executed compared with a system that uses cost-functions to determine the behavior. When multiple cost-functions are present, it can become difficult to tweak the costs to achieve the correct behavior. In addition the occasional unexpected behavior can occur with cost-functions. Not so with Behavior Trees. 
 * The Trajectory is constructed using a "Sine Ease In Out" easing function; see [Github (lines 148-152)](https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c) . Easing functions are commonly used in computer animation. The chosen easing function seems to work just as fine as a Minimal Jerk Trajectory but is much simpler to implement.
@@ -113,7 +113,7 @@ The result, depending on the Action node which is reached, is that 1 of 3 types 
 
 The new path plan is then sent to the simulator and the update cycle is ended.
 
-
+## Overview of Source Code
 
 ### main.cpp
 
@@ -122,10 +122,10 @@ Reading the waypoint data from the supplied CSV file. Make sure to add 2 extra w
 
 ##### Fitting splines to waypoints (lines 235-246)
 Creating 4 splines to fit the waypoint data:
-1. Spline: $f(S) = X$
-2. Spline: $f(S) = Y$
-3. Spline: $f(S) = dX$
-4. Spline: $f(S) = dY$
+1. Spline: f(S) = X
+2. Spline: f(S) = Y
+3. Spline: f(S) = dX
+4. Spline: f(S) = dY
 
 ##### Creating the PathPlanner object (lines 250-253)
 Initializing the `PathPlanner` object with a `distance increment` of `0.0` because the vehicle is standing still and with a `frenet d` value of `6.0`, given that the vehicle is in the middle lane. The maximum speed is also set to 46 m/s.
@@ -170,7 +170,7 @@ For every iteration of the loop:
 
 ##### Finding the closest vehicles (lines 14-120)
 
-... ticks ahead...
+Using the number of ticks ahead, the future estimate of the `frenet s` positions is determined for the autonomous vehicle and later also for the other vehicles on the road. The `frenet s` values are used to determine whether the other vehicles are in front or behind the autonomous vehicle.
 
 In this method vehicles which are closer than 40 meters in front and closer than 15 meters behind are put in vectors per lane. The result is thus 3 vectors with vehicles in front, one for each lane, and 3 vectors with vehicles behind, also one for each lane. These vectors are used in other methods for easy counting and access to relevant vehicle data such as speed.
 
@@ -216,7 +216,7 @@ Here the start and goal values for `frenet S dot` and `frenet d` are set in the 
 
 This is the implementation of the "Sine Ease In Out" function for the `frenet s dot` value. It treats two cases. One case where the goal value is higher than the start value and the other case where the goal value is lower than the start value. 
 
-The `p` value is incremented based on the difference between the start and goal value times some constant (in this case 500), which has been found by trial-and-error. When `p` is `1.0` the trajectory generation is finished.
+The `p` value is incremented at every tick received by the Action node. This increment is based on the difference between the start and goal value times some constant (in this case 500), which has been found by trial-and-error. The Action node will return 'running' to the Behavior Tree. When `p` is `1.0` the trajectory generation is finished. The Action node will now return 'success'.
 
 ##### Generating trajectory in terms of frenet D using an easing function (lines 51-80)
 
