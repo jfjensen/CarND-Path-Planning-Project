@@ -105,11 +105,11 @@ In this implementation the model receives a data update from the simulator 50 ti
 
 A typical update cycle looks like this: The model first receives the data from the simulator. This data consists of positions and speed of the autonomous vehicle, the positions and speed of the other vehicles and the remainder of the previous path plan (i.e. the part which has not yet been executed). The vehicle data is collected and sent to the `Path Planner` object. If, for some reason, the path plan is empty, a new path plan that consists of '50 ticks' will be created. In any case, no matter how many new path plan positions are to be created, a loop takes care of this. 
 
-For every iteration of the loop, first it is determined how many 'ticks' the path plan is ahead of the actual position of the autonomous vehicle. The `Path Planner` object is then tasked with finding the closest vehicles given the 'ticks ahead'. So, if the path plan is 50 ticks ahead then the `Path Planner` object is to find the closest vehicles 1s in the future. This is obviously an estimate. It is based on the assumptions previously mentioned.
+For every iteration of the loop, first it is determined how many 'ticks' the path plan is ahead of the actual position of the autonomous vehicle. The `Path Planner` object is then tasked with finding the closest vehicles given the 'ticks ahead'. So, for example, if the path plan is 50 ticks ahead then the `Path Planner` object is to find the closest vehicles 1s in the future. This is obviously an estimate. It is based on the assumptions previously mentioned.
 
-The next action in the loop is to run 1 tick in the Behavior Tree. The root node of the tree receives the `selector_root->tick()` instruction and then tells its children to 'tick' as well. See below for a diagram of the Behavior Tree and a short overview of how it works. 
+The next action in the loop is to run 1 tick in the Behavior Tree. The root node of the tree receives the `selector_root->tick()` instruction and then tells its children to 'tick' as well. The tick follows a depth-first search path down the tree until an Action node is reached which returns either 'success' or 'running'. See below for a diagram of the Behavior Tree and a short overview of how it works. 
 
-The result, depending on the Action node which is reached, is that 1 of 3 types of behavior are chosen: Change lane, Change speed or Keep speed (and lane). In the case of the changes, the `Path Planner` object tells a `Trajectory` object to create some new `frenet s dot` (set as the distance increment variable) or `frenet d` values. These values are in their turn sent back to the loop where they are used to create a new position to add to the path plan. The loop is now ended.
+The result, depending on the specific Action node which is reached, is that 1 of 3 types of behavior are chosen: Change lane, Change speed or Keep speed (and lane). In the case of the changes, the `Path Planner` object tells a `Trajectory` object to create some new `frenet s dot` (set as the distance increment variable) or `frenet d` values. These values are in their turn sent back to the loop where they are used to create a new position to add to the path plan. The loop is now ended.
 
 The new path plan is then sent to the simulator and the update cycle is ended.
 
@@ -141,7 +141,7 @@ There are 4 types of nodes in the Behavior Tree (in short):
 3. Conditional: a predicate is tested and the result is 'success' or 'failure'.
 4. Action: an action (in this implementation) will either return 'running' or 'success'.
 
-The selector and sequence nodes return to the same child if it returned 'running'. In this manner the Behavior Tree saves the state of the path planning. This is necessary given that some of the Action nodes have a state. When the path planner is in the process changing lanes the Action node which is responsible for this behavior returns 'running'. When it is finished, it returns 'success'.
+The selector and sequence nodes return to the same child during the 'next tick' if it returned 'running'. In this manner the Behavior Tree saves the state of the path planning. This is necessary given that some of the Action nodes have a state. When the path planner is in the process changing lanes the Action node which is responsible for this behavior returns 'running'. When it is finished, it returns 'success'.
 
 ##### Saving the data of the other vehicles in a vector (lines 396-412)
 
@@ -200,7 +200,7 @@ No change in distance increment or lane.
 
 ##### Constructing the actions "Changing speed to maximum or reference" (lines 384-429)
 
-The methods `actChangeToMaxSpeed` and `actChangeToRefSpeed` call the `actChangeSpeed` method which is a general method for changing the speed of the vehicle. The latter method takes a start speed and a goal speed. First a Trajectory object is created and then it is initialized with the start and goal speeds. The PathPlanner object is now set to 'running'. As long as it is running, it will tell the Trajectory object to generate a new `frenet s dot` value and retrieve it. The `distance increment` is set to the retrieved value. When the Trajectory object is finished generating `frenet s dot` values, the change speed method will return 'success'.
+The methods `actChangeToMaxSpeed` and `actChangeToRefSpeed` call the `actChangeSpeed` method which is a general method for changing the speed of the vehicle. The first two methods are executed by an Action node. The latter method is called by the former and takes a start speed and a goal speed. First a Trajectory object is created and then it is initialized with the start and goal speeds. The Action node is now set to 'running'. As long as it is running, for every tick the Action node receives, the Trajectory object will generate a new `frenet s dot` value and retrieve it. The `distance increment` is set to the retrieved value. When the Trajectory object is finished generating `frenet s dot` values, the change speed method will return 'success'.
 
 #####  Constructing the actions "Changing lanes" (lines 431-474)
 
