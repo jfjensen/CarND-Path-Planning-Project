@@ -94,10 +94,26 @@ git checkout e94b6e1
 
 ## Model Documentation
 
-The model I have implemented uses a Behavior Tree which is used to determine the behavior of the autonomous vehicle. Every time a certain behavior is chosen, a Trajectory which executes that behavior, is constructed and carried out by the Path Planner.
+The model I have implemented is based on a Behavior Tree which is used to determine the behavior of the autonomous vehicle. Every time a certain behavior is chosen by the Behavior Tree, a Trajectory is constructed which executes that behavior.
 
-* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson [PDF](https://www.google.be/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjdy8uinKTVAhXGcBoKHSJcCz0QFggzMAA&url=http%3A%2F%2Fwww.diva-portal.org%2Fsmash%2Fget%2Fdiva2%3A907048%2FFULLTEXT01.pdf&usg=AFQjCNEFT-Jl9WkK0B-Ycz0_e0IcD_Au1A) . A Behavior Tree is an interesting solution given that it is easy to extend with new behaviors.
-* The Trajectory is constructed using a "SineEaseInOut" easing function; see [Github (lines 148-152)](https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c) . Easing functions are commonly used in computer animation. The chosen easing function seems to work just as fine as a Minimal Jerk Trajectory but is much simpler to implement.
+* The Behavior Tree is based on the Master's thesis "Behavior Trees for decision-making in autonomous driving" by Magnus Olsson [PDF](https://www.google.be/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjdy8uinKTVAhXGcBoKHSJcCz0QFggzMAA&url=http%3A%2F%2Fwww.diva-portal.org%2Fsmash%2Fget%2Fdiva2%3A907048%2FFULLTEXT01.pdf&usg=AFQjCNEFT-Jl9WkK0B-Ycz0_e0IcD_Au1A) . A Behavior Tree is an interesting solution for the following reasons:
+  * It is easy to extend with new behaviors. Compared with an FSM it is much easier to extend and to maintain the source code.
+  * It is also easier to determine which behaviors are executed compared with a system that uses cost-functions to determine the behavior. When multiple cost-functions are present, it can become difficult to tweak the costs to achieve the correct behavior. In addition the occasional unexpected behavior can occur with cost-functions. Not so with Behavior Trees. 
+* The Trajectory is constructed using a "Sine Ease In Out" easing function; see [Github (lines 148-152)](https://github.com/warrenm/AHEasing/blob/master/AHEasing/easing.c) . Easing functions are commonly used in computer animation. The chosen easing function seems to work just as fine as a Minimal Jerk Trajectory but is much simpler to implement.
+
+In this implementation the model receives a data update from the simulator 50 times a second. Every time this update is received, the model also updates the path plan with new position(s) and sends it back to the simulator. This plan reaches '50 ticks' into the future, corresponding to 1s (because 50 ticks * 1/50 sec update rate). It is assumed that the other vehicles on the road do not change their speed or lane during this 1s. Usually the plan is not created from scratch, but consists of the plan from previous update minus the position of 1 tick.
+
+A typical update cycle looks like this: The model first receives the data from the simulator. This data consists of positions and speed of the autonomous vehicle, the positions and speed of the other vehicles and the remainder of the previous path plan (i.e. the part which has not yet been executed). The vehicle data is collected and sent to the `Path Planner` object. If, for some reason, the path plan is empty, a new path plan that consists of '50 ticks' will be created. In any case, no matter how many new path plan positions are to be created, a loop takes care of this. 
+
+For every iteration of the loop, first it is determined how many 'ticks' the path plan is ahead of the actual position of the autonomous vehicle. The `Path Planner` object is then tasked with finding the closest vehicles given the 'ticks ahead'. So, if the path plan is 50 ticks ahead then the `Path Planner` object is to find the closest vehicles 1s in the future. This is obviously an estimate. It is based on the assumptions previously mentioned.
+
+The next action in the loop is to run 1 tick in the Behavior Tree. The root node of the tree receives the `selector_root->tick()` instruction and then tells its children to 'tick' as well. See below for a diagram of the Behavior Tree and a short overview of how it works. 
+
+The result, depending on the Action node which is reached, is that 1 of 3 types of behavior are chosen: Change lane, Change speed or Keep speed (and lane). In the case of the changes, the `Path Planner` object tells a `Trajectory` object to create some new `frenet s dot` (set as the distance increment variable) or `frenet d` values. These values are in their turn sent back to the loop where they are used to create a new position to add to the path plan. The loop is now ended.
+
+The new path plan is then sent to the simulator and the update cycle is ended.
+
+
 
 ### main.cpp
 
@@ -112,11 +128,20 @@ Creating 4 splines to fit the waypoint data:
 4. Spline: $f(S) = dY$
 
 ##### Creating the PathPlanner object (lines 250-253)
-Initializing the `PathPlanner` object with a `distance increment` of `0.0` because the vehicle is standing still and with a `frenet d value` of `6.0`, given that the vehicle is in the middle lane. The maximum speed is also set to 46 ms.
+Initializing the `PathPlanner` object with a `distance increment` of `0.0` because the vehicle is standing still and with a `frenet d` value of `6.0`, given that the vehicle is in the middle lane. The maximum speed is also set to 46 m/s.
 
 ##### Building the Behavior Tree (lines 258-334)
 ![](bt.jpg)
-The structure of the Behavior Tree can be seen in the diagram above. The code has been indented in order to reflect the structure.
+The structure of the Behavior Tree can be seen in the diagram above. The source code has been indented in order to reflect the structure.
+
+There are 4 types of nodes in the Behavior Tree (in short):
+
+1. Selector: if one of the child nodes returns 'success' then the selector node is also returns 'success'. Otherwise it returns 'running' if one of its children is running or else it returns 'failure'.
+2. Sequence: if all the child nodes are returning 'success' then the sequence will also return 'success'. Otherwise it returns 'running' if one of its children is running or else it returns 'failure'.
+3. Conditional: a predicate is tested and the result is 'success' or 'failure'.
+4. Action: an action (in this implementation) will either return 'running' or 'success'.
+
+The selector and sequence nodes return to the same child if it returned 'running'. In this manner the Behavior Tree saves the state of the path planning. This is necessary given that some of the Action nodes have a state. When the path planner is in the process changing lanes the Action node which is responsible for this behavior returns 'running'. When it is finished, it returns 'success'.
 
 ##### Saving the data of the other vehicles in a vector (lines 396-412)
 
@@ -124,17 +149,20 @@ The structure of the Behavior Tree can be seen in the diagram above. The code ha
 
 ##### Initializing the path plan (lines 427-454)
 
+* Saving the remainder of the path plan, which was returned by the vehicle.
+* If the path plan is empty, initialize path planner position based on position of vehicle.
+* Otherwise infer path planner position based on the position in the saved path plan.
+
 ##### Adding positions to the path plan (lines 461-488)
 
 A for loop is used to make sure that a path is projected 50 ticks out in the future.
 
-Finding the closest vehicles using the ticks ahead.
+For every iteration of the loop:
 
-The behavior tree is being run using `selector_root->tick()`. 
-
-The new  `distance increment` value is retrieved from the `PathPlanner` object. A modulo operator is applied to the `distance increment` in order to close the loop.
-
-Using the splines and the `frenet d value` in order to calculate the `x` and `y` position.
+* Finding the closest vehicles given the ticks ahead.
+* The behavior tree is being run using `selector_root->tick()`. 
+* The new  `distance increment` value is retrieved from the `PathPlanner` object. A modulo operator is applied to the `distance increment` in order to close the loop.
+* Using the splines and the `frenet d` value from the `PathPlanner` in order to calculate the `x` and `y` position.
 
 
 
@@ -142,7 +170,9 @@ Using the splines and the `frenet d value` in order to calculate the `x` and `y`
 
 ##### Finding the closest vehicles (lines 14-120)
 
-...
+... ticks ahead...
+
+In this method vehicles which are closer than 40 meters in front and closer than 15 meters behind are put in vectors per lane. The result is thus 3 vectors with vehicles in front, one for each lane, and 3 vectors with vehicles behind, also one for each lane. These vectors are used in other methods for easy counting and access to relevant vehicle data such as speed.
 
 ##### Set the data of the autonomous vehicle (lines 132-145)
 
@@ -150,13 +180,19 @@ Setting the autonomous vehicle speed in the `PathPlanner` object using the `dist
 
 ##### Constructing the predicate "Is there a car in front?" (lines 150-189)
 
+If the vector containing vehicles in front for the same lane as the autonomous vehicle is of non-zero length then this predicate return true.
+
 ##### Constructing the predicate "Does the car in front have a lower speed?" (lines 191-252)
 
 ##### Constructing the predicate "Is the car at less than maximum speed?" (lines 254-267)
 
 ##### Constructing the predicates "Are there lanes to the left or right?" (lines 270-294)
 
+If the autonomous vehicle is in the leftmost lane it cannot change to 'the left lane', because there isn't any. Likewise for the rightmost lane. There is no lane to the right.
+
 ##### Constructing the predicates "Can our car move the left or right lane?" (lines 296-375)
+
+Are there any vehicles in the vectors for the left or right lanes? If not, then these predicates return true.
 
 ##### Constructing the action "Keep current speed (and lane)" (lines 378-382)
 
@@ -164,7 +200,7 @@ No change in distance increment or lane.
 
 ##### Constructing the actions "Changing speed to maximum or reference" (lines 384-429)
 
-The methods `actChangeToMaxSpeed` and `actChangeToRefSpeed` call the `actChangeSpeed` method which is a general method for changing the speed of the vehicle. The latter method takes a start speed and a goal speed. First a Trajectory object is created and then it is initialized with the start and goal speeds. The PathPlanner object is now set to RUNNING. As long as it is running, it will tell the Trajectory object to generate a new `frenet s dot` value and retrieve it. The `distance increment` is set to the retrieved value. When the Trajectory object is finished generating `frenet s dot` values, the change speed method will return SUCCESS.
+The methods `actChangeToMaxSpeed` and `actChangeToRefSpeed` call the `actChangeSpeed` method which is a general method for changing the speed of the vehicle. The latter method takes a start speed and a goal speed. First a Trajectory object is created and then it is initialized with the start and goal speeds. The PathPlanner object is now set to 'running'. As long as it is running, it will tell the Trajectory object to generate a new `frenet s dot` value and retrieve it. The `distance increment` is set to the retrieved value. When the Trajectory object is finished generating `frenet s dot` values, the change speed method will return 'success'.
 
 #####  Constructing the actions "Changing lanes" (lines 431-474)
 
@@ -174,9 +210,17 @@ The methods `actChangeSpeed` and `actChangeToRight` call the `actChangeLane` met
 
 ##### Initializing the `Trajectory` object (lines 3-18)
 
+Here the start and goal values for `frenet S dot` and `frenet d` are set in the object. A variable `p` is also initialized to `0.0`. This variable is used to keep track of progress of the trajectory generation. 
+
 ##### Generating trajectory in terms of frenet S dot using an easing function (lines 20-49)
 
+This is the implementation of the "Sine Ease In Out" function for the `frenet s dot` value. It treats two cases. One case where the goal value is higher than the start value and the other case where the goal value is lower than the start value. 
+
+The `p` value is incremented based on the difference between the start and goal value times some constant (in this case 500), which has been found by trial-and-error. When `p` is `1.0` the trajectory generation is finished.
+
 ##### Generating trajectory in terms of frenet D using an easing function (lines 51-80)
+
+The implementation of the "Sine Ease In Out" function for the `frenet d` value follows the above implementation. The increment of the `p` value has a different constant (30).
 
 ### node.cpp
 
