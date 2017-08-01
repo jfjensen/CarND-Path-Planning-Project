@@ -317,7 +317,7 @@ bool PathPlanner::predChangeToLeft()
       if ((midlane_infront.size() == 0) and (midlane_behind.size() == 0))
       {
         
-        start_car_d = 10.0;
+        start_car_d = 9.8;//10.0;
         goal_car_d  =  6.0;
 
         return true;
@@ -358,7 +358,7 @@ bool PathPlanner::predChangeToRight()
       {
         
         start_car_d =  6.0;
-        goal_car_d  = 10.0;
+        goal_car_d  = 9.8; //10.0;
 
         return true;
       }
