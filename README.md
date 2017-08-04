@@ -231,3 +231,6 @@ The implementation of the "Sine Ease In Out" function for the `frenet d` value f
 ##### Implementing the `tick()` method for the `Sequence` class (lines 25-48)
 
 ##### Implementing the `tick()` method for the `Selector` class (lines 50-74)
+
+## Demo Video
+A video showing a project demo can be found on [Youtube](https://youtu.be/ZbUuOS6stdc) .
